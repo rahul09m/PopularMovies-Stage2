@@ -1,7 +1,10 @@
 package com.example.android.popularmovies;
 
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,8 +14,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,12 +36,12 @@ public class MainActivityFragment extends Fragment {
    private AndroidFlavorAdapter flavorAdapter;
     private ArrayAdapter<String> mAdapter;
     AndroidFlavor[] androidFlavors;
-   // private ArrayList<AndroidFlavor> flavorList;
 
     @Override
     public void onStart() {
         super.onStart();
-        new FetchWeatherTask().execute();
+        //new FetchWeatherTask().execute();
+        updateMovies();
    }
    /* @Override
     public void onCreate(Bundle savedInstanceState){
@@ -110,6 +115,14 @@ public class MainActivityFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    private void updateMovies(){
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sort_by = prefs.getString(getString(R.string.sort_by_key),
+                getString(R.string.pref_unit_value));
+        weatherTask.execute(sort_by);
+    }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
@@ -121,7 +134,13 @@ public class MainActivityFragment extends Fragment {
       // Get a reference to the ListView, and attach this adapter to it.
       GridView gridView = (GridView) rootView.findViewById(R.id.flavors_grid);
       gridView.setAdapter(flavorAdapter);
-
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                AndroidFlavor flavorClick = flavorAdapter.getItem(position);
+                Toast.makeText(getContext(),flavorClick.versionName,Toast.LENGTH_SHORT).show();
+            }
+        });
       return rootView;
   }
 
@@ -154,7 +173,7 @@ public class MainActivityFragment extends Fragment {
                     getString(R.string.pref_units_key),
                     getString(R.string.pref_units_metric));*/
 
-            String[] resultStrs = new String[moviesArray.length()];
+
             androidFlavors = new AndroidFlavor[moviesArray.length()];
             for (int i = 0; i < moviesArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
@@ -168,16 +187,10 @@ public class MainActivityFragment extends Fragment {
                 String movieTitle = movie.getString(TITLE);
                 String url = "http://image.tmdb.org/t/p/w185/".concat(moviePoster);
 
-                resultStrs[i] = url;
-
-                    //flavorAdapter.add(new AndroidFlavor(url));
+                                  //flavorAdapter.add(new AndroidFlavor(url));
                 androidFlavors[i] = new AndroidFlavor(movieTitle, url);
-                Log.d(LOG_TAG, androidFlavors[i].toString());
             }
 
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Movie: " + s);
-            }
             return androidFlavors;// resultStrs;
         }
 
@@ -190,17 +203,20 @@ public class MainActivityFragment extends Fragment {
             String forecastJsonStr = null;
 //http://api.themoviedb.org/3/discover/movie?sort_by=highest-rated.desc&api_key=666d1649e381a40ffcfed1c252c74584
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
+
                 final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String QUERY_PARAM = "sort_by";
-                final String FORMAT_PARAM = "mode";
-                final String UNITS_PARAM = "units";
-                final String DAYS_PARAM = "cnt";
-                final String APPID_PARAM = "APPID";
-                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by" +
-                        "=popularity.desc&api_key=666d1649e381a40ffcfed1c252c74584");
+
+                final String APPID_PARAM = "api_key";
+                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, params[0])
+                        .appendQueryParameter(APPID_PARAM, "666d1649e381a40ffcfed1c252c74584")
+                        .build();
+
+                URL url= new URL(builtUri.toString());
+                Log.d(LOG_TAG, "Built URI " + builtUri.toString());
+              //  URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by" +
+                 //       "=highest-rated.desc&api_key=666d1649e381a40ffcfed1c252c74584");
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -259,6 +275,7 @@ public class MainActivityFragment extends Fragment {
         protected void onPostExecute(AndroidFlavor[] strings) {
             if (strings != null){
                //flavorAdapter.add(new AndroidFlavor(s));
+                flavorAdapter.clear();
                 flavorAdapter.addAll(strings);
 
         }

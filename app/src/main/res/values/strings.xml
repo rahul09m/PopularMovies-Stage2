@@ -5,4 +5,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="refresh">Refresh</string>
+    <string name="sort_by_label">Sort By</string>
+    <string name="sort_by_key">sort</string>
+    <string name="pref_unit_value">popular.desc</string>
+    <string name="sort_by_label_popular">Popularity</string>
+    <string name="sort_by_label_rated">Highest Rated</string>
+    <string name="sort_by_rated">highest-rated.desc</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>
