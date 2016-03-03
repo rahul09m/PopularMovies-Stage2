@@ -3,20 +3,20 @@ package com.example.android.popularmovies;
 /**
  * Created by rmenezes on 3/1/2016.
  */
-public class AndroidFlavor {
-    String versionName;
+public class Movie {
+    String movieName;
     String versionNumber;
     String image; // drawable reference id
 
-    //public AndroidFlavor(String vName, String vNumber, String image)
-    public AndroidFlavor(String vName, String image)
+    //public Movie(String vName, String vNumber, String image)
+    public Movie(String mName, String image)
     {
-        this.versionName = vName;
+        this.movieName = mName;
         //this.versionNumber = vNumber;
         this.image = image;
     }
 
-  /*  public AndroidFlavor(JSONObject object){
+  /*  public Movie(JSONObject object){
         try {
             this.name = object.getString("name");
             this.hometown = object.getString("hometown");
@@ -37,7 +37,7 @@ public class AndroidFlavor {
     }
 }*/
 
-    /*private AndroidFlavor(Parcel in){
+    /*private Movie(Parcel in){
         versionName = in.readString();
         versionNumber = in.readString();
         image = in.readInt();
@@ -57,15 +57,15 @@ public class AndroidFlavor {
         parcel.writeInt(image);
     }
 
-    public final Parcelable.Creator<AndroidFlavor> CREATOR = new Parcelable.Creator<AndroidFlavor>() {
+    public final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
         @Override
-        public AndroidFlavor createFromParcel(Parcel parcel) {
-            return new AndroidFlavor(parcel);
+        public Movie createFromParcel(Parcel parcel) {
+            return new Movie(parcel);
         }
 
         @Override
-        public AndroidFlavor[] newArray(int i) {
-            return new AndroidFlavor[i];
+        public Movie[] newArray(int i) {
+            return new Movie[i];
         }
 
     };*/

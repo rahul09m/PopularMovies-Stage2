@@ -33,21 +33,21 @@ import java.util.ArrayList;
 
 public class MainActivityFragment extends Fragment {
 
-   private AndroidFlavorAdapter flavorAdapter;
+   private MovieAdapter movieAdapter;
     private ArrayAdapter<String> mAdapter;
-    AndroidFlavor[] androidFlavors;
+    Movie[] movies;
 
     @Override
     public void onStart() {
         super.onStart();
-        //new FetchWeatherTask().execute();
+        //new FetchMoviesTask().execute();
         updateMovies();
    }
    /* @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         if(savedInstanceState == null || !savedInstanceState.containsKey("flavors")) {
-            flavorList = new ArrayList<AndroidFlavor>(Arrays.asList(androidFlavors));
+            flavorList = new ArrayList<Movie>(Arrays.asList(movies));
         }
         else {
             flavorList = savedInstanceState.getParcelableArrayList("flavors");
@@ -68,18 +68,18 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        flavorAdapter = new AndroidFlavorAdapter(getActivity(), flavorList);
+        movieAdapter = new MovieAdapter(getActivity(), flavorList);
 
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_flavor);
-        listView.setAdapter(flavorAdapter);
+        listView.setAdapter(movieAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                AndroidFlavor flavorClick = flavorAdapter.getItem(i);
+                Movie flavorClick = movieAdapter.getItem(i);
                 flavorClick.versionName += ":)";
-                flavorAdapter.notifyDataSetChanged();
+                movieAdapter.notifyDataSetChanged();
             }
         });
 
@@ -109,14 +109,14 @@ public class MainActivityFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            new FetchWeatherTask().execute();
+            new FetchMoviesTask().execute();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     private void updateMovies(){
-        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        FetchMoviesTask weatherTask = new FetchMoviesTask();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sort_by = prefs.getString(getString(R.string.sort_by_key),
                 getString(R.string.pref_unit_value));
@@ -128,17 +128,17 @@ public class MainActivityFragment extends Fragment {
                            Bundle savedInstanceState) {
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-      //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList(Arrays.asList(androidFlavors)));
+      //movieAdapter = new MovieAdapter(getActivity(), new ArrayList(Arrays.asList(movies)));
 
-      flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList<AndroidFlavor>());
+      movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
       // Get a reference to the ListView, and attach this adapter to it.
       GridView gridView = (GridView) rootView.findViewById(R.id.flavors_grid);
-      gridView.setAdapter(flavorAdapter);
+      gridView.setAdapter(movieAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                AndroidFlavor flavorClick = flavorAdapter.getItem(position);
-                Toast.makeText(getContext(),flavorClick.versionName,Toast.LENGTH_SHORT).show();
+                Movie flavorClick = movieAdapter.getItem(position);
+                Toast.makeText(getContext(),flavorClick.movieName,Toast.LENGTH_SHORT).show();
             }
         });
       return rootView;
@@ -147,13 +147,13 @@ public class MainActivityFragment extends Fragment {
 
 
 
-    private class FetchWeatherTask extends AsyncTask<String,Void,AndroidFlavor[]> {
+    private class FetchMoviesTask extends AsyncTask<String,Void,Movie[]> {
 
-        private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
        // private String[] getWeatherDataFromJson(String forecastJsonStr)
             //throws JSONException {
-       private AndroidFlavor[] getWeatherDataFromJson(String forecastJsonStr)
+       private Movie[] getWeatherDataFromJson(String forecastJsonStr)
             throws JSONException{
             // These are the names of the JSON objects that need to be extracted.
             final String MOVIES_RESULT = "results";
@@ -174,7 +174,7 @@ public class MainActivityFragment extends Fragment {
                     getString(R.string.pref_units_metric));*/
 
 
-            androidFlavors = new AndroidFlavor[moviesArray.length()];
+            movies = new Movie[moviesArray.length()];
             for (int i = 0; i < moviesArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String day;
@@ -187,15 +187,15 @@ public class MainActivityFragment extends Fragment {
                 String movieTitle = movie.getString(TITLE);
                 String url = "http://image.tmdb.org/t/p/w185/".concat(moviePoster);
 
-                                  //flavorAdapter.add(new AndroidFlavor(url));
-                androidFlavors[i] = new AndroidFlavor(movieTitle, url);
+                                  //movieAdapter.add(new Movie(url));
+                movies[i] = new Movie(movieTitle, url);
             }
 
-            return androidFlavors;// resultStrs;
+            return movies;// resultStrs;
         }
 
         @Override
-        protected AndroidFlavor[] doInBackground(String... params) {
+        protected Movie[] doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -272,11 +272,11 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(AndroidFlavor[] strings) {
+        protected void onPostExecute(Movie[] strings) {
             if (strings != null){
-               //flavorAdapter.add(new AndroidFlavor(s));
-                flavorAdapter.clear();
-                flavorAdapter.addAll(strings);
+               //movieAdapter.add(new Movie(s));
+                movieAdapter.clear();
+                movieAdapter.addAll(strings);
 
         }
     }

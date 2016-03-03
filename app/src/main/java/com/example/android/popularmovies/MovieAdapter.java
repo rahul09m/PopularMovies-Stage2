@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * Created by rmenezes on 3/1/2016.
  */
-public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
-    private static final String LOG_TAG = AndroidFlavorAdapter.class.getSimpleName();
+public class MovieAdapter extends ArrayAdapter<Movie> {
+    private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
     /**
      * This is our own custom constructor (it doesn't mirror a superclass constructor).
@@ -24,14 +24,14 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
      * to populate into the lists
      *
      * @param context        The current context. Used to inflate the layout file.
-     * @param androidFlavors A List of AndroidFlavor objects to display in a list
+     * @param movies A List of Movie objects to display in a list
      */
-    public AndroidFlavorAdapter(Activity context, List<AndroidFlavor> androidFlavors) {
+    public MovieAdapter(Activity context, List<Movie> movies) {
         // Here, we initialize the ArrayAdapter's internal storage for the context and the list.
         // the second argument is used when the ArrayAdapter is populating a single TextView.
         // Because this is a custom adapter for two TextViews and an ImageView, the adapter is not
         // going to use this second argument, so it can be any value. Here, we used 0.
-        super(context,0, androidFlavors);
+        super(context,0, movies);
     }
 
     /**
@@ -45,8 +45,8 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Gets the AndroidFlavor object from the ArrayAdapter at the appropriate position
-        AndroidFlavor androidFlavor = getItem(position);
+        // Gets the Movie object from the ArrayAdapter at the appropriate position
+        Movie movie = getItem(position);
 
         // Adapters recycle views to AdapterViews.
         // If this is a new View object we're getting, then inflate the layout.
@@ -59,12 +59,12 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
 
           //  http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
-       // iconView.setImageResource(androidFlavor.image);
-        Picasso.with(getContext()).load(androidFlavor.image).into(iconView);
-        Log.d(LOG_TAG, "Movie name: "+ androidFlavor.versionName);
+       // iconView.setImageResource(movie.image);
+        Picasso.with(getContext()).load(movie.image).into(iconView);
+        Log.d(LOG_TAG, "Movie name: "+ movie.movieName);
        // TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-        //versionNameView.setText(androidFlavor.versionName
-         //       + " - " + androidFlavor.versionNumber);
+        //versionNameView.setText(movie.versionName
+         //       + " - " + movie.versionNumber);
 
         return convertView;
     }
