@@ -34,14 +34,14 @@ public class MainActivityFragment extends Fragment {
     private ArrayAdapter<String> mAdapter;
    // private ArrayList<AndroidFlavor> flavorList;
 
-   /* @Override
+    @Override
     public void onStart() {
         super.onStart();
-        new FetchWeatherTask().execute();*/
-   // }
+        new FetchWeatherTask().execute();
+   }
 
 
-    AndroidFlavor[] androidFlavors = {
+    /*AndroidFlavor[] androidFlavors = {
 
             new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg" ),
             new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
@@ -53,8 +53,8 @@ public class MainActivityFragment extends Fragment {
             new AndroidFlavor("Ice Cream Sandwich", "4.0-4.0.4", R.drawable.ic_launcher),
             new AndroidFlavor("Jelly Bean", "4.1-4.3.1", R.drawable.ic_launcher),
             new AndroidFlavor("KitKat", "4.4-4.4.4", R.drawable.ic_launcher),
-            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.ic_launcher)*/
-    };
+            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.ic_launcher)
+    };*/
 
    /* @Override
     public void onCreate(Bundle savedInstanceState){
@@ -133,8 +133,9 @@ public class MainActivityFragment extends Fragment {
                            Bundle savedInstanceState) {
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-      flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList(Arrays.asList(androidFlavors)));
+      //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList(Arrays.asList(androidFlavors)));
       //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new List<String>());
+      flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList<AndroidFlavor>());
 
 
 
