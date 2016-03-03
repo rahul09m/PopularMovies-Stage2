@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +31,7 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
         // the second argument is used when the ArrayAdapter is populating a single TextView.
         // Because this is a custom adapter for two TextViews and an ImageView, the adapter is not
         // going to use this second argument, so it can be any value. Here, we used 0.
-        super(context, 0, androidFlavors);
+        super(context,0, androidFlavors);
     }
 
     /**
@@ -55,12 +57,14 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
                     R.layout.flavor_item, parent, false);
         }
 
+          //  http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
-        iconView.setImageResource(androidFlavor.image);
+       // iconView.setImageResource(androidFlavor.image);
+        Picasso.with(getContext()).load(androidFlavor.image).into(iconView);
 
-        TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-        versionNameView.setText(androidFlavor.versionName
-                + " - " + androidFlavor.versionNumber );
+       // TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
+        //versionNameView.setText(androidFlavor.versionName
+         //       + " - " + androidFlavor.versionNumber);
 
         return convertView;
     }

@@ -1,20 +1,18 @@
 package com.example.android.popularmovies;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Created by rmenezes on 3/1/2016.
  */
 public class AndroidFlavor {
     String versionName;
     String versionNumber;
-    int image; // drawable reference id
+    String image; // drawable reference id
 
-    public AndroidFlavor(String vName, String vNumber, int image)
+    //public AndroidFlavor(String vName, String vNumber, String image)
+    public AndroidFlavor(String image)
     {
-        this.versionName = vName;
-        this.versionNumber = vNumber;
+       // this.versionName = vName;
+        //this.versionNumber = vNumber;
         this.image = image;
     }
 

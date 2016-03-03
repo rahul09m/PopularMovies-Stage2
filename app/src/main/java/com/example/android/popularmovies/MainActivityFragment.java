@@ -1,34 +1,59 @@
 package com.example.android.popularmovies;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivityFragment extends Fragment {
 
-    private AndroidFlavorAdapter flavorAdapter;
+   private AndroidFlavorAdapter flavorAdapter;
+    //private AndroidFlavor[] androidFlavors = null;
+    private ArrayAdapter<String> mAdapter;
+   // private ArrayList<AndroidFlavor> flavorList;
 
-    private ArrayList<AndroidFlavor> flavorList;
+   /* @Override
+    public void onStart() {
+        super.onStart();
+        new FetchWeatherTask().execute();*/
+   // }
+
 
     AndroidFlavor[] androidFlavors = {
-            new AndroidFlavor("Cupcake", "1.5",R.drawable.ic_launcher ),
-            new AndroidFlavor("Donut", "1.6", R.drawable.ic_launcher),
-            new AndroidFlavor("Eclair", "2.0-2.1", R.drawable.ic_launcher),
+
+            new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg" ),
+            new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+            new AndroidFlavor( "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
+            /*
             new AndroidFlavor("Froyo", "2.2-2.2.3", R.drawable.ic_launcher),
             new AndroidFlavor("GingerBread", "2.3-2.3.7", R.drawable.ic_launcher),
             new AndroidFlavor("Honeycomb", "3.0-3.2.6", R.drawable.ic_launcher),
             new AndroidFlavor("Ice Cream Sandwich", "4.0-4.0.4", R.drawable.ic_launcher),
             new AndroidFlavor("Jelly Bean", "4.1-4.3.1", R.drawable.ic_launcher),
             new AndroidFlavor("KitKat", "4.4-4.4.4", R.drawable.ic_launcher),
-            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.ic_launcher)
+            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.ic_launcher)*/
     };
 
    /* @Override
@@ -77,17 +102,189 @@ public class MainActivityFragment extends Fragment {
     public MainActivityFragment() {
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.moviefragment,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_refresh) {
+            new FetchWeatherTask().execute();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-      flavorAdapter = new AndroidFlavorAdapter(getActivity(), Arrays.asList(androidFlavors));
+      flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList(Arrays.asList(androidFlavors)));
+      //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new List<String>());
+
+
 
       // Get a reference to the ListView, and attach this adapter to it.
       GridView gridView = (GridView) rootView.findViewById(R.id.flavors_grid);
+
       gridView.setAdapter(flavorAdapter);
 
       return rootView;
   }
+
+
+
+
+    private class FetchWeatherTask extends AsyncTask<String,Void,String[]> {
+
+        private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+
+        private String[] getWeatherDataFromJson(String forecastJsonStr)
+                throws JSONException {
+
+            // These are the names of the JSON objects that need to be extracted.
+            final String MOVIES_RESULT = "results";
+            final String POSTER_PATH = "poster_path";
+            final String TITLE = "title";
+            final String OWM_MAX = "max";
+            final String OWM_MIN = "min";
+            final String OWM_DESCRIPTION = "main";
+            final String OWM_DATETIME = "dt";
+
+            JSONObject moviesJson = new JSONObject(forecastJsonStr);
+            JSONArray moviesArray = moviesJson.getJSONArray(MOVIES_RESULT);
+
+        /*    SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unitType = sharedPrefs.getString(
+                    getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_metric));*/
+
+            String[] resultStrs = new String[moviesArray.length()];
+            for (int i = 0; i < moviesArray.length(); i++) {
+                // For now, using the format "Day, description, hi/low"
+                String day;
+                String description;
+                String highAndLow;
+
+                // Get the JSON object representing the day
+                JSONObject movie = moviesArray.getJSONObject(i);
+                String moviePoster = movie.getString(POSTER_PATH);
+                String movieTitle = movie.getString(TITLE);
+                String url = "http://image.tmdb.org/t/p/w185/".concat(moviePoster);
+
+                resultStrs[i] =  url;
+                //androidFlavors[i] =  AndroidFlavor(movieTitle,"hello",url);
+            }
+
+            for (String s : resultStrs) {
+                Log.v(LOG_TAG, "Movie: " + s);
+            }
+            return resultStrs;
+        }
+
+        @Override
+        protected String[] doInBackground(String... params) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            // Will contain the raw JSON response as a string.
+            String forecastJsonStr = null;
+//http://api.themoviedb.org/3/discover/movie?sort_by=highest-rated.desc&api_key=666d1649e381a40ffcfed1c252c74584
+            try {
+                // Construct the URL for the OpenWeatherMap query
+                // Possible parameters are avaiable at OWM's forecast API page, at
+                // http://openweathermap.org/API#forecast
+                final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
+                final String QUERY_PARAM = "sort_by";
+                final String FORMAT_PARAM = "mode";
+                final String UNITS_PARAM = "units";
+                final String DAYS_PARAM = "cnt";
+                final String APPID_PARAM = "APPID";
+                URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by" +
+                        "=popularity.desc&api_key=666d1649e381a40ffcfed1c252c74584");
+
+                // Create the request to OpenWeatherMap, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                forecastJsonStr = buffer.toString();
+                Log.d(LOG_TAG,"result is: "+ forecastJsonStr);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the weather data, there's no point in attemping
+                // to parse it.
+                return null;
+            } finally{
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            try {
+                return getWeatherDataFromJson(forecastJsonStr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            if (strings != null){
+                //ArrayList<AndroidFlavor> nm = AndroidFlavor.
+                //flavorAdapter.clear();
+              //  Log.d(LOG_TAG,"strings is: "+ strings);
+             for (String s : strings){
+              // Log.d(LOG_TAG,"s is: "+ s);
+                 //  AndroidFlavor newFlavor = new AndroidFlavor(s);
+                //flavorAdapter.addAll(strings);
+                flavorAdapter.add(new AndroidFlavor(s));
+          }
+        }
+    }
+}
 }
