@@ -9,12 +9,33 @@ public class AndroidFlavor {
     String image; // drawable reference id
 
     //public AndroidFlavor(String vName, String vNumber, String image)
-    public AndroidFlavor(String image)
+    public AndroidFlavor(String vName, String image)
     {
-       // this.versionName = vName;
+        this.versionName = vName;
         //this.versionNumber = vNumber;
         this.image = image;
     }
+
+  /*  public AndroidFlavor(JSONObject object){
+        try {
+            this.name = object.getString("name");
+            this.hometown = object.getString("hometown");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }*/
+  /*  public static ArrayList<User> fromJson(JSONArray jsonObjects) {
+           ArrayList<User> users = new ArrayList<User>();
+           for (int i = 0; i < jsonObjects.length(); i++) {
+               try {
+                  users.add(new User(jsonObjects.getJSONObject(i)));
+               } catch (JSONException e) {
+                  e.printStackTrace();
+               }
+          }
+          return users;
+    }
+}*/
 
     /*private AndroidFlavor(Parcel in){
         versionName = in.readString();

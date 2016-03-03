@@ -25,13 +25,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivityFragment extends Fragment {
 
    private AndroidFlavorAdapter flavorAdapter;
-    //private AndroidFlavor[] androidFlavors = null;
     private ArrayAdapter<String> mAdapter;
+    AndroidFlavor[] androidFlavors;
    // private ArrayList<AndroidFlavor> flavorList;
 
     @Override
@@ -39,23 +38,6 @@ public class MainActivityFragment extends Fragment {
         super.onStart();
         new FetchWeatherTask().execute();
    }
-
-
-    /*AndroidFlavor[] androidFlavors = {
-
-            new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg" ),
-            new AndroidFlavor("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
-            new AndroidFlavor( "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"),
-            /*
-            new AndroidFlavor("Froyo", "2.2-2.2.3", R.drawable.ic_launcher),
-            new AndroidFlavor("GingerBread", "2.3-2.3.7", R.drawable.ic_launcher),
-            new AndroidFlavor("Honeycomb", "3.0-3.2.6", R.drawable.ic_launcher),
-            new AndroidFlavor("Ice Cream Sandwich", "4.0-4.0.4", R.drawable.ic_launcher),
-            new AndroidFlavor("Jelly Bean", "4.1-4.3.1", R.drawable.ic_launcher),
-            new AndroidFlavor("KitKat", "4.4-4.4.4", R.drawable.ic_launcher),
-            new AndroidFlavor("Lollipop", "5.0-5.1.1", R.drawable.ic_launcher)
-    };*/
-
    /* @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -134,14 +116,10 @@ public class MainActivityFragment extends Fragment {
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
       //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList(Arrays.asList(androidFlavors)));
-      //flavorAdapter = new AndroidFlavorAdapter(getActivity(), new List<String>());
+
       flavorAdapter = new AndroidFlavorAdapter(getActivity(), new ArrayList<AndroidFlavor>());
-
-
-
       // Get a reference to the ListView, and attach this adapter to it.
       GridView gridView = (GridView) rootView.findViewById(R.id.flavors_grid);
-
       gridView.setAdapter(flavorAdapter);
 
       return rootView;
@@ -150,13 +128,14 @@ public class MainActivityFragment extends Fragment {
 
 
 
-    private class FetchWeatherTask extends AsyncTask<String,Void,String[]> {
+    private class FetchWeatherTask extends AsyncTask<String,Void,AndroidFlavor[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
-        private String[] getWeatherDataFromJson(String forecastJsonStr)
-                throws JSONException {
-
+       // private String[] getWeatherDataFromJson(String forecastJsonStr)
+            //throws JSONException {
+       private AndroidFlavor[] getWeatherDataFromJson(String forecastJsonStr)
+            throws JSONException{
             // These are the names of the JSON objects that need to be extracted.
             final String MOVIES_RESULT = "results";
             final String POSTER_PATH = "poster_path";
@@ -176,6 +155,7 @@ public class MainActivityFragment extends Fragment {
                     getString(R.string.pref_units_metric));*/
 
             String[] resultStrs = new String[moviesArray.length()];
+            androidFlavors = new AndroidFlavor[moviesArray.length()];
             for (int i = 0; i < moviesArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String day;
@@ -188,18 +168,21 @@ public class MainActivityFragment extends Fragment {
                 String movieTitle = movie.getString(TITLE);
                 String url = "http://image.tmdb.org/t/p/w185/".concat(moviePoster);
 
-                resultStrs[i] =  url;
-                //androidFlavors[i] =  AndroidFlavor(movieTitle,"hello",url);
+                resultStrs[i] = url;
+
+                    //flavorAdapter.add(new AndroidFlavor(url));
+                androidFlavors[i] = new AndroidFlavor(movieTitle, url);
+                Log.d(LOG_TAG, androidFlavors[i].toString());
             }
 
             for (String s : resultStrs) {
                 Log.v(LOG_TAG, "Movie: " + s);
             }
-            return resultStrs;
+            return androidFlavors;// resultStrs;
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected AndroidFlavor[] doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -246,7 +229,6 @@ public class MainActivityFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.d(LOG_TAG,"result is: "+ forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -274,18 +256,12 @@ public class MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String[] strings) {
+        protected void onPostExecute(AndroidFlavor[] strings) {
             if (strings != null){
-                //ArrayList<AndroidFlavor> nm = AndroidFlavor.
-                //flavorAdapter.clear();
-              //  Log.d(LOG_TAG,"strings is: "+ strings);
-             for (String s : strings){
-              // Log.d(LOG_TAG,"s is: "+ s);
-                 //  AndroidFlavor newFlavor = new AndroidFlavor(s);
-                //flavorAdapter.addAll(strings);
-                flavorAdapter.add(new AndroidFlavor(s));
-          }
+               //flavorAdapter.add(new AndroidFlavor(s));
+                flavorAdapter.addAll(strings);
+
         }
     }
-}
+  }
 }

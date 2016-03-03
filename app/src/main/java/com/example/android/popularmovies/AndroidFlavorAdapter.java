@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,6 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,7 +61,7 @@ public class AndroidFlavorAdapter extends ArrayAdapter<AndroidFlavor> {
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
        // iconView.setImageResource(androidFlavor.image);
         Picasso.with(getContext()).load(androidFlavor.image).into(iconView);
-
+        Log.d(LOG_TAG, "Movie name: "+ androidFlavor.versionName);
        // TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
         //versionNameView.setText(androidFlavor.versionName
          //       + " - " + androidFlavor.versionNumber);
