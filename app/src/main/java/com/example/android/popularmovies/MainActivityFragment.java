@@ -1,5 +1,6 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -30,11 +31,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivityFragment extends Fragment {
 
    private MovieAdapter movieAdapter;
-    private ArrayAdapter<String> mAdapter;
+    //private ArrayList<Movie> movies;
     Movie[] movies;
 
     @Override
@@ -43,58 +45,29 @@ public class MainActivityFragment extends Fragment {
         //new FetchMoviesTask().execute();
         updateMovies();
    }
-   /* @Override
-    public void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        if(savedInstanceState == null || !savedInstanceState.containsKey("flavors")) {
-            flavorList = new ArrayList<Movie>(Arrays.asList(movies));
-        }
-        else {
-            flavorList = savedInstanceState.getParcelableArrayList("flavors");
-        }
-    }
 
     public MainActivityFragment() {
     }
 
- /*   @Override
+ /*  @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if((savedInstanceState == null) || !savedInstanceState.containsKey("moviesList")){
+            movies = new Movie[0];
+        }else {
+            movies = savedInstanceState.getParcelable("moviesList");
+        }
+    }
+
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("flavors", flavorList);
+        outState.putParcelableArray("moviesList",movies);
         super.onSaveInstanceState(outState);
     }*/
 
-  /*  @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        movieAdapter = new MovieAdapter(getActivity(), flavorList);
 
-        // Get a reference to the ListView, and attach this adapter to it.
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_flavor);
-        listView.setAdapter(movieAdapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Movie flavorClick = movieAdapter.getItem(i);
-                flavorClick.versionName += ":)";
-                movieAdapter.notifyDataSetChanged();
-            }
-        });
-
-        return rootView;
-    }*/
-
-    public MainActivityFragment() {
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -138,13 +111,14 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie flavorClick = movieAdapter.getItem(position);
-                Toast.makeText(getContext(),flavorClick.movieName,Toast.LENGTH_SHORT).show();
+                Intent movieClick = new Intent(getActivity(),MovieDetails.class);
+                movieClick.putExtra("movie",flavorClick);
+                startActivity(movieClick);
+               // Toast.makeText(getContext(),flavorClick.movieName,Toast.LENGTH_SHORT).show();
             }
         });
       return rootView;
   }
-
-
 
 
     private class FetchMoviesTask extends AsyncTask<String,Void,Movie[]> {
@@ -158,23 +132,18 @@ public class MainActivityFragment extends Fragment {
             // These are the names of the JSON objects that need to be extracted.
             final String MOVIES_RESULT = "results";
             final String POSTER_PATH = "poster_path";
-            final String TITLE = "title";
-            final String OWM_MAX = "max";
-            final String OWM_MIN = "min";
-            final String OWM_DESCRIPTION = "main";
-            final String OWM_DATETIME = "dt";
+            final String ORIGINAL_TITLE = "original_title";
+            final String OVERVIEW = "overview";
+            final String RELEASE_DATE = "release_date";
+            final String VOTE_AVERAGE = "vote_average";
+           final String poster_url = "http://image.tmdb.org/t/p/w185/";
+
 
             JSONObject moviesJson = new JSONObject(forecastJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(MOVIES_RESULT);
 
-        /*    SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String unitType = sharedPrefs.getString(
-                    getString(R.string.pref_units_key),
-                    getString(R.string.pref_units_metric));*/
-
-
             movies = new Movie[moviesArray.length()];
+          // movies = new ArrayList<Movie>(moviesArray.length());
             for (int i = 0; i < moviesArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String day;
@@ -184,11 +153,14 @@ public class MainActivityFragment extends Fragment {
                 // Get the JSON object representing the day
                 JSONObject movie = moviesArray.getJSONObject(i);
                 String moviePoster = movie.getString(POSTER_PATH);
-                String movieTitle = movie.getString(TITLE);
-                String url = "http://image.tmdb.org/t/p/w185/".concat(moviePoster);
+                String movieTitle = movie.getString(ORIGINAL_TITLE);
+                String releaseDate = movie.getString(RELEASE_DATE);
+                String overView = movie.getString(OVERVIEW);
+                String voteAverage = movie.getString(VOTE_AVERAGE);
+                String url = poster_url.concat(moviePoster);
 
                                   //movieAdapter.add(new Movie(url));
-                movies[i] = new Movie(movieTitle, url);
+                movies[i] = new Movie(movieTitle,overView,releaseDate,voteAverage, url);
             }
 
             return movies;// resultStrs;
@@ -210,15 +182,12 @@ public class MainActivityFragment extends Fragment {
                 final String APPID_PARAM = "api_key";
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, params[0])
-                        .appendQueryParameter(APPID_PARAM, "666d1649e381a40ffcfed1c252c74584")
+                        .appendQueryParameter(APPID_PARAM, BuildConfig.API_KEY)
                         .build();
 
                 URL url= new URL(builtUri.toString());
                 Log.d(LOG_TAG, "Built URI " + builtUri.toString());
-              //  URL url = new URL("http://api.themoviedb.org/3/discover/movie?sort_by" +
-                 //       "=highest-rated.desc&api_key=666d1649e381a40ffcfed1c252c74584");
 
-                // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();

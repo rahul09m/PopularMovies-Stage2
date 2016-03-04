@@ -18,10 +18,10 @@ android {
         }
     }
 
-  /*  buildTypes.each{
-        //it.buildConfigField 'String', 'MY_API_KEY',"\"e0742eb274d5fe69ad03d76db8430c65\""
-        it.buildConfigField 'String', 'API_KEY',MyApiKey
-    }*/
+  buildTypes.each{
+
+        it.buildConfigField 'String', 'API_KEY',TheMovieDB_ApiKey
+    }
 }
 
 repositories {
