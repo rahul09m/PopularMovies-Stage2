@@ -1,4 +1,21 @@
-<GridView
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivityFragment"
+    tools:showIn="@layout/activity_main">
+    <GridView
+        android:id="@+id/grid_view"
+        android:numColumns="auto_fit"
+        android:layout_below="@+id/toolbar"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </GridView>
+
+</RelativeLayout>
+
+<!--<GridView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,4 +27,4 @@
     android:stretchMode="columnWidth"
     tools:context=".MainActivityFragment"
     android:id="@+id/flavors_grid">
-</GridView>
+</GridView>-->

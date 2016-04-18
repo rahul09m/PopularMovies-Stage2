@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,9 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,10 +28,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivityFragment extends Fragment {
-
    private MovieAdapter movieAdapter;
     //private ArrayList<Movie> movies;
     Movie[] movies;
@@ -42,7 +37,6 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        //new FetchMoviesTask().execute();
         updateMovies();
    }
 
@@ -65,9 +59,6 @@ public class MainActivityFragment extends Fragment {
         outState.putParcelableArray("moviesList",movies);
         super.onSaveInstanceState(outState);
     }*/
-
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -100,12 +91,10 @@ public class MainActivityFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
       View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
       //movieAdapter = new MovieAdapter(getActivity(), new ArrayList(Arrays.asList(movies)));
-
       movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
       // Get a reference to the ListView, and attach this adapter to it.
-      GridView gridView = (GridView) rootView.findViewById(R.id.flavors_grid);
+      GridView gridView = (GridView) rootView.findViewById(R.id.grid_view);
       gridView.setAdapter(movieAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -114,7 +103,6 @@ public class MainActivityFragment extends Fragment {
                 Intent movieClick = new Intent(getActivity(),MovieDetails.class);
                 movieClick.putExtra("movie",flavorClick);
                 startActivity(movieClick);
-               // Toast.makeText(getContext(),flavorClick.movieName,Toast.LENGTH_SHORT).show();
             }
         });
       return rootView;
@@ -125,9 +113,7 @@ public class MainActivityFragment extends Fragment {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
-       // private String[] getWeatherDataFromJson(String forecastJsonStr)
-            //throws JSONException {
-       private Movie[] getWeatherDataFromJson(String forecastJsonStr)
+       private Movie[] getMovieDataFromJson(String forecastJsonStr)
             throws JSONException{
             // These are the names of the JSON objects that need to be extracted.
             final String MOVIES_RESULT = "results";
@@ -136,8 +122,7 @@ public class MainActivityFragment extends Fragment {
             final String OVERVIEW = "overview";
             final String RELEASE_DATE = "release_date";
             final String VOTE_AVERAGE = "vote_average";
-           final String poster_url = "http://image.tmdb.org/t/p/w185/";
-
+            final String poster_url = "http://image.tmdb.org/t/p/w185/";
 
             JSONObject moviesJson = new JSONObject(forecastJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(MOVIES_RESULT);
@@ -145,12 +130,7 @@ public class MainActivityFragment extends Fragment {
             movies = new Movie[moviesArray.length()];
           // movies = new ArrayList<Movie>(moviesArray.length());
             for (int i = 0; i < moviesArray.length(); i++) {
-                // For now, using the format "Day, description, hi/low"
-                String day;
-                String description;
-                String highAndLow;
-
-                // Get the JSON object representing the day
+                                // Get the JSON object representing the movie
                 JSONObject movie = moviesArray.getJSONObject(i);
                 String moviePoster = movie.getString(POSTER_PATH);
                 String movieTitle = movie.getString(ORIGINAL_TITLE);
@@ -158,28 +138,22 @@ public class MainActivityFragment extends Fragment {
                 String overView = movie.getString(OVERVIEW);
                 String voteAverage = movie.getString(VOTE_AVERAGE);
                 String url = poster_url.concat(moviePoster);
-
                                   //movieAdapter.add(new Movie(url));
                 movies[i] = new Movie(movieTitle,overView,releaseDate,voteAverage, url);
             }
-
-            return movies;// resultStrs;
+            return movies;
         }
 
         @Override
         protected Movie[] doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String forecastJsonStr = null;
-//http://api.themoviedb.org/3/discover/movie?sort_by=highest-rated.desc&api_key=666d1649e381a40ffcfed1c252c74584
+            String movieJasonStr = null;
             try {
-
                 final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String QUERY_PARAM = "sort_by";
-
                 final String APPID_PARAM = "api_key";
+
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, params[0])
                         .appendQueryParameter(APPID_PARAM, BuildConfig.API_KEY)
@@ -213,10 +187,10 @@ public class MainActivityFragment extends Fragment {
                     // Stream was empty.  No point in parsing.
                     return null;
                 }
-                forecastJsonStr = buffer.toString();
+                movieJasonStr = buffer.toString();
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
+                // If the code didn't successfully get the movie data, there's no point in attemping
                 // to parse it.
                 return null;
             } finally{
@@ -232,7 +206,7 @@ public class MainActivityFragment extends Fragment {
                 }
             }
             try {
-                return getWeatherDataFromJson(forecastJsonStr);
+                return getMovieDataFromJson(movieJasonStr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();

@@ -26,7 +26,6 @@ public class MovieDetails extends AppCompatActivity {
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);*/
-
         Intent receiveIntent = getIntent();
         Movie myMovie =  receiveIntent.getParcelableExtra("movie");
        // String movieName= receiveIntent.getStringExtra(Intent.EXTRA_TEXT);
