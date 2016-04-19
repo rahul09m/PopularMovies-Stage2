@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class MainActivityFragment extends Fragment {
    private MovieAdapter movieAdapter;
     //private ArrayList<Movie> movies;
     Movie[] movies;
+    private WeakReference<FetchMoviesTask> asyncTaskWeakRef;
 
     @Override
     public void onStart() {
@@ -42,23 +44,21 @@ public class MainActivityFragment extends Fragment {
 
     public MainActivityFragment() {
     }
-
- /*  @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if((savedInstanceState == null) || !savedInstanceState.containsKey("moviesList")){
-            movies = new Movie[0];
-        }else {
+        setRetainInstance(true);
+        /*if (savedInstanceState != null && savedInstanceState.containsKey("moviesList")) {
             movies = savedInstanceState.getParcelable("moviesList");
-        }
+        }*/
+        //updateMovies();
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArray("moviesList",movies);
+       // outState.putParcelableArray("moviesList",movies);
         super.onSaveInstanceState(outState);
-    }*/
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -72,15 +72,21 @@ public class MainActivityFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_refresh) {
+        /*if (id == R.id.action_refresh) {
             new FetchMoviesTask().execute();
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean isAsyncTaskPendingOrRunning() {
+        return this.asyncTaskWeakRef != null &&
+                this.asyncTaskWeakRef.get() != null &&
+                !this.asyncTaskWeakRef.get().getStatus().equals(AsyncTask.Status.FINISHED);
+    }
     private void updateMovies(){
-        FetchMoviesTask weatherTask = new FetchMoviesTask();
+        FetchMoviesTask weatherTask = new FetchMoviesTask(this);
+        this.asyncTaskWeakRef = new WeakReference<FetchMoviesTask>(weatherTask);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sort_by = prefs.getString(getString(R.string.sort_by_key),
                 getString(R.string.pref_unit_value));
@@ -112,8 +118,14 @@ public class MainActivityFragment extends Fragment {
     private class FetchMoviesTask extends AsyncTask<String,Void,Movie[]> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
+        private WeakReference<MainActivityFragment> fragmentWeakRef;
 
-       private Movie[] getMovieDataFromJson(String forecastJsonStr)
+        private FetchMoviesTask (MainActivityFragment fragment) {
+            this.fragmentWeakRef = new WeakReference<MainActivityFragment>(fragment);
+        }
+
+
+        private Movie[] getMovieDataFromJson(String forecastJsonStr)
             throws JSONException{
             // These are the names of the JSON objects that need to be extracted.
             final String MOVIES_RESULT = "results";
@@ -216,11 +228,13 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] strings) {
-            if (strings != null){
-               //movieAdapter.add(new Movie(s));
+            if (this.fragmentWeakRef.get() != null) {
+            if (strings != null) {
+                //movieAdapter.add(new Movie(s));
                 movieAdapter.clear();
                 movieAdapter.addAll(strings);
-
+                movieAdapter.notifyDataSetChanged();
+            }
         }
     }
   }
