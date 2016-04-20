@@ -15,11 +15,6 @@ public class MovieDetails extends AppCompatActivity {
        // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
       //  setSupportActionBar(toolbar);
        // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-       // ActionBar ab = getSupportActionBar();
-       // ab.setDisplayHomeAsUpEnabled(true);
-        //.id.voteaverage);
-      //  voteaverageText.setText(myMovie.userRating);*/
-
 
     }
 

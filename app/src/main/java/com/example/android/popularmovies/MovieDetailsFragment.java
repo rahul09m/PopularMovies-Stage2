@@ -30,10 +30,7 @@ public class MovieDetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_details, container, false);
         Intent receiveIntent = getActivity().getIntent();
         Movie myMovie =  receiveIntent.getParcelableExtra("movie");
-        // String movieName= receiveIntent.getStringExtra(Intent.EXTRA_TEXT);
-        //Log.d(LOG_TAG,"Moee:"+ myMovie.movieName);
 
-        // String movieName = myMovie.
         TextView movieNameText = (TextView) view.findViewById(R.id.moviename);
         movieNameText.setText(myMovie.movieName);
         ImageView imageMovie = (ImageView) view.findViewById(R.id.movieimage);
