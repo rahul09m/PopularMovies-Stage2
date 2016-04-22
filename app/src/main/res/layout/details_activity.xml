@@ -10,6 +10,7 @@
     tools:context="com.example.android.popularmovies.MovieDetails">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -24,5 +25,6 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_details" />
+
 
 </android.support.design.widget.CoordinatorLayout>

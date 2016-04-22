@@ -60,7 +60,10 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
           //  http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
         ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
        // iconView.setImageResource(movie.image);
-        Picasso.with(getContext()).load(movie.image).into(iconView);
+        Picasso.with(getContext())
+                .load(movie.image)
+                .placeholder(R.drawable.ic_launcher)
+                .into(iconView);
         Log.d(LOG_TAG, "Movie name: "+ movie.movieName);
        // TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
         //versionNameView.setText(movie.versionName

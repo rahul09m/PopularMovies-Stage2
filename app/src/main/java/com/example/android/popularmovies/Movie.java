@@ -11,16 +11,18 @@ public class Movie implements Parcelable {
     String overView;
     String releaseDate;
     String userRating;
-    String image; // drawable reference id
+    String image;
+    String movieID;// drawable reference id
 
 
 
-    public Movie (String mName, String oView,String rDate, String userR, String image) {
+    public Movie (String mName, String oView,String rDate, String userR, String image,String id) {
         this.movieName = mName;
         this.overView = oView;
         this.releaseDate = rDate;
         this.userRating = userR;
         this.image = image;
+        this.movieID=id;
     }
 
     @Override
@@ -35,6 +37,7 @@ public class Movie implements Parcelable {
         dest.writeString(this.releaseDate);
         dest.writeString(this.userRating);
         dest.writeString(this.image);
+        dest.writeString(this.movieID);
     }
 
     protected Movie(Parcel in) {
@@ -43,6 +46,7 @@ public class Movie implements Parcelable {
         this.releaseDate = in.readString();
         this.userRating = in.readString();
         this.image = in.readString();
+        this.movieID = in.readString();
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
