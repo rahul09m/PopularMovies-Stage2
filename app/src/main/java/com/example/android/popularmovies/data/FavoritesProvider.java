@@ -45,5 +45,9 @@ public class FavoritesProvider {
         public static Uri withId(long id) {
             return buildUri(Path.FAVORITES, String.valueOf(id));
         }
+
+        public static Uri withMovieID(String movieid){
+            return buildUri(Path.FAVORITES, movieid);
+        }
     }
 }

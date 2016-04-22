@@ -54,29 +54,21 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     public MainActivityFragment() {
     }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
        // setRetainInstance(true);
-
-        ConnectivityManager cm =
-                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        checkConnection();
         movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
         if (savedInstanceState != null) {
             movies = savedInstanceState.getParcelableArrayList(KEY_MOVIES);
-           // movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
-          //  movieAdapter.clear();
-            movieAdapter.addAll(movies);
-          //  movieAdapter.notifyDataSetChanged();
-        }else{
+            updateAdapter(movies);
+                 }else{
             if (isConnected){
-                               // noConnection.setVisibility(View.GONE);
-               // movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
-                updateMovies();
+                fetchMovies(getResources().getString(R.string.pref_unit_value));
             } else{
                 Toast.makeText(getContext(),"No Connection",Toast.LENGTH_SHORT).show();
                 // noConnection.setVisibility(View.VISIBLE);
@@ -88,9 +80,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        //movieAdapter = new MovieAdapter(getActivity(), new ArrayList(Arrays.asList(movies)));
-        /// movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
-        // Get a reference to the ListView, and attach this adapter to it.
         GridView gridView = (GridView) rootView.findViewById(R.id.grid_view);
         gridView.setAdapter(movieAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -123,30 +112,21 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+      /*  if (id == R.id.action_settings) {
             startActivity(new Intent(getContext(), SettingsActivity.class));
             return true;
+        }*/
+        if (id == R.id.action_popular) {
+            fetchMovies(getResources().getString(R.string.pref_unit_value));
+        }
+        if (id == R.id.action_rated) {
+            fetchMovies(getResources().getString(R.string.sort_by_rated));
         }
         if (id == R.id.action_favorites) {
-          //  Toast.makeText(getContext(),"Fav",Toast.LENGTH_SHORT).show();
-            getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+            getLoaderManager().restartLoader(FAVORITE_LOADER, null, this);
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private boolean isAsyncTaskPendingOrRunning() {
-        return this.asyncTaskWeakRef != null &&
-                this.asyncTaskWeakRef.get() != null &&
-                !this.asyncTaskWeakRef.get().getStatus().equals(AsyncTask.Status.FINISHED);
-    }
-    private void updateMovies(){
-        FetchMoviesTask weatherTask = new FetchMoviesTask(this);
-        this.asyncTaskWeakRef = new WeakReference<FetchMoviesTask>(weatherTask);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sort_by = prefs.getString(getString(R.string.sort_by_key),
-                getString(R.string.pref_unit_value));
-        weatherTask.execute(sort_by);
     }
 
     @Override
@@ -157,38 +137,25 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (cursor != null && cursor.getCount() > 0) {
-            //cursor.moveToFirst();
-           // movies = new Movie[cursor.getCount()];
             movies = new ArrayList<>(cursor.getCount());
             Log.d("Cursor", String.valueOf(cursor.getCount()));
-          //  for (int i = 0; i < cursor.getCount(); i++) {
             while (cursor.moveToNext()) {
-              // movies[i] = new Movie(cursor.getString(cursor.getColumnIndex(FavoritesColumns.TITLE)),
                 Movie movie = new Movie(cursor.getString(cursor.getColumnIndex(FavoritesColumns.TITLE)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.OVERVIEW)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.RELEASE_DATA)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.VOTE_AVERAGE)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.POSTER_PATH)),
                         cursor.getString(cursor.getColumnIndex(FavoritesColumns.MOVIE_ID)));
-               // cursor.moveToNext();
                 movies.add(movie);
-
             }
-
             cursor.close();
-           // movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
-            movieAdapter.clear();
-            movieAdapter.addAll(movies);
-            movieAdapter.notifyDataSetChanged();
+            updateAdapter(movies);
         }else{
             Toast.makeText(getContext(),"No FAvs",Toast.LENGTH_SHORT).show();
         }
     }
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
+    public void onLoaderReset(Loader<Cursor> loader) {}
 
     private class FetchMoviesTask extends AsyncTask<String,Void,List<Movie>> {
 
@@ -309,12 +276,42 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         protected void onPostExecute(List<Movie> strings) {
             if (this.fragmentWeakRef.get() != null) {
             if (strings != null) {
-                //movieAdapter.add(new Movie(s));
-                movieAdapter.clear();
-                movieAdapter.addAll(strings);
-                movieAdapter.notifyDataSetChanged();
-            }
+                updateAdapter(strings);
+                            }
         }
     }
   }
+    // Utilites **********************************/
+    private void updateAdapter(List<Movie> movieToAdd){
+        movieAdapter.clear();
+        movieAdapter.addAll(movieToAdd);
+        movieAdapter.notifyDataSetChanged();
+    }
+
+    private void fetchMovies(String sortByString){
+        FetchMoviesTask weatherTask = new FetchMoviesTask(this);
+        this.asyncTaskWeakRef = new WeakReference<FetchMoviesTask>(weatherTask);
+        weatherTask.execute(sortByString);
+    }
+
+    private void checkConnection(){
+        ConnectivityManager cm =
+                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+      /*  private boolean isAsyncTaskPendingOrRunning() {
+        return this.asyncTaskWeakRef != null &&
+                this.asyncTaskWeakRef.get() != null &&
+                !this.asyncTaskWeakRef.get().getStatus().equals(AsyncTask.Status.FINISHED);
+    }
+    private void updateMovies(){
+        FetchMoviesTask weatherTask = new FetchMoviesTask(this);
+        this.asyncTaskWeakRef = new WeakReference<FetchMoviesTask>(weatherTask);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sort_by = prefs.getString(getString(R.string.sort_by_key),
+                getString(R.string.pref_unit_value));
+        weatherTask.execute(sort_by);
+    }*/
 }

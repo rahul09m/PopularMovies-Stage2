@@ -25,6 +25,7 @@ public class MovieDetailsFragment extends Fragment {
     // FloatingActionButton fabFavorite;
     Movie myMovie;
     Context mContext;
+    FloatingActionButton fabFavorite;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -60,11 +61,13 @@ public class MovieDetailsFragment extends Fragment {
         TextView voteaverageText = (TextView) view.findViewById(R.id.voteaverage);
         voteaverageText.setText(myMovie.userRating);
 
-        FloatingActionButton fabFavorite = (FloatingActionButton) view.findViewById(R.id.fab_add);
+        fabFavorite = (FloatingActionButton) view.findViewById(R.id.fab_add);
+       if (isFavorite())
+           fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
+
         fabFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Toast.makeText(getContext(),"sup",Toast.LENGTH_SHORT).show();
                 addToFavorite();
             }
         });
@@ -74,12 +77,10 @@ public class MovieDetailsFragment extends Fragment {
 
 
     private void addToFavorite() {
-        Cursor c = getContext().getContentResolver().query(FavoritesProvider.Favorites.CONTENT_URI,
-                new String[] {FavoritesColumns.MOVIE_ID},FavoritesColumns.MOVIE_ID+ "=?",
-                new String[] {myMovie.movieID.toString()},null);
-
-        if (c.getCount()!=0){
-            Toast.makeText(getContext(),"Exists",Toast.LENGTH_SHORT).show();
+        if (isFavorite()){
+            Toast.makeText(getContext(),"Movie Deleted",Toast.LENGTH_LONG).show();
+            getContext().getContentResolver().delete(FavoritesProvider.Favorites.withMovieID(myMovie.movieID), null, null);
+            fabFavorite.setImageResource(R.drawable.ic_star_border_black_24dp);
         }else {
             ContentValues cv = new ContentValues();
             cv.put(FavoritesColumns.TITLE, myMovie.movieName);
@@ -89,7 +90,22 @@ public class MovieDetailsFragment extends Fragment {
             cv.put(FavoritesColumns.OVERVIEW, myMovie.overView);
             cv.put(FavoritesColumns.MOVIE_ID, myMovie.movieID);
             Uri result = getContext().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
-            Log.d("reults", String.valueOf(result));
+            fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
+            Toast.makeText(getContext(),"Movie Added",Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean isFavorite(){
+        Cursor c = getContext().getContentResolver().query(FavoritesProvider.Favorites.CONTENT_URI,
+                new String[] {FavoritesColumns.MOVIE_ID},FavoritesColumns.MOVIE_ID+ "=?",
+                new String[] {myMovie.movieID.toString()},null);
+        if (c != null) {
+            if (c.getCount() == 1){
+                c.close();
+                return true;
+            }
+            c.close();
+        }
+        return false;
     }
 }
