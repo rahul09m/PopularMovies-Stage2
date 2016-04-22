@@ -62,6 +62,7 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
        // iconView.setImageResource(movie.image);
         Picasso.with(getContext())
                 .load(movie.image)
+                .error(R.drawable.ic_launcher)
                 .placeholder(R.drawable.ic_launcher)
                 .into(iconView);
         Log.d(LOG_TAG, "Movie name: "+ movie.movieName);

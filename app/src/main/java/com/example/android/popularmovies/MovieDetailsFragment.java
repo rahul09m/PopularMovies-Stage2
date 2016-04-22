@@ -35,6 +35,8 @@ public class MovieDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent receiveIntent = getActivity().getIntent();
+        myMovie = receiveIntent.getParcelableExtra("movie");
         //setRetainInstance(true);
     }
 
@@ -43,14 +45,12 @@ public class MovieDetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_details, container, false);
-        Intent receiveIntent = getActivity().getIntent();
-        myMovie = receiveIntent.getParcelableExtra("movie");
-
         TextView movieNameText = (TextView) view.findViewById(R.id.moviename);
         movieNameText.setText(myMovie.movieName);
         ImageView imageMovie = (ImageView) view.findViewById(R.id.movieimage);
         Picasso.with(getContext())
                 .load(myMovie.image)
+                .error(R.drawable.ic_launcher)
                 .placeholder(R.drawable.ic_launcher)
                 .into(imageMovie);
         TextView releaseText = (TextView) view.findViewById(R.id.releasedate);
