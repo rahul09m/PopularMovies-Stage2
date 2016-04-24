@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,12 +22,30 @@ import com.example.android.popularmovies.data.FavoritesColumns;
 import com.example.android.popularmovies.data.FavoritesProvider;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MovieDetailsFragment extends Fragment {
     // FloatingActionButton fabFavorite;
     Movie myMovie;
     Context mContext;
     FloatingActionButton fabFavorite;
+    private ArrayList<Reviews> reviews;
+    private ReviewAdapter reviewAdapter;
+    private ListView listviewReviews;
+   // private ArrayList<Trailers> trailers;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -37,6 +57,9 @@ public class MovieDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Intent receiveIntent = getActivity().getIntent();
         myMovie = receiveIntent.getParcelableExtra("movie");
+        reviewAdapter = new ReviewAdapter(getActivity(), new ArrayList<Reviews>());
+        FetchReviewsTask fetchReviewsTask = new FetchReviewsTask(this);
+        fetchReviewsTask.execute(myMovie.movieID);
         //setRetainInstance(true);
     }
 
@@ -72,9 +95,149 @@ public class MovieDetailsFragment extends Fragment {
             }
         });
 
+
+        listviewReviews = (ListView) view.findViewById(R.id.listview_review);
+        listviewReviews.setAdapter(reviewAdapter);
+
         return view;
     }
 
+    //private class FetchReviewsTask extends AsyncTask
+    private class FetchReviewsTask extends AsyncTask<String,Void,List> {
+
+        private final String LOG_TAG = FetchReviewsTask.class.getSimpleName();
+        private WeakReference<MovieDetailsFragment> fragmentWeakRef;
+
+        private FetchReviewsTask (MovieDetailsFragment fragment) {
+            this.fragmentWeakRef = new WeakReference<MovieDetailsFragment>(fragment);
+        }
+
+
+        private List<Reviews> getMovieDataFromJson(String forecastJsonStr)
+                throws JSONException {
+            // These are the names of the JSON objects that need to be extracted.
+            final String REVIEWS_RESULT = "results";
+            final String AUTHOR = "author";
+            final String CONTENT = "content";
+            final String REVIEWURL = "url";
+            final String REVIEW_ID = "id";
+
+            JSONObject moviesJson = new JSONObject(forecastJsonStr);
+            JSONObject reviewsJSON = moviesJson.getJSONObject("reviews");
+            JSONArray moviesArrayReviews = reviewsJSON.getJSONArray(REVIEWS_RESULT);
+
+            // movies = new Movie[moviesArray.length()];
+            reviews = new ArrayList<>(moviesArrayReviews.length());
+            for (int i = 0; i < moviesArrayReviews.length(); i++) {
+                // Get the JSON object representing the movie
+                JSONObject reviewsJ = moviesArrayReviews.getJSONObject(i);
+                String reviewID = reviewsJ.getString(REVIEW_ID);
+                String author = reviewsJ.getString(AUTHOR);
+                String content = reviewsJ.getString(CONTENT);
+                String url = reviewsJ.getString(REVIEWURL);
+
+                Reviews review = new Reviews(reviewID,author,content,url);
+                reviews.add(review);
+            }
+            Log.d(LOG_TAG,"reviews"+reviews);
+            return  reviews;
+
+        }
+
+        @Override
+        protected List doInBackground(String... params) {
+            if (params.length==0)
+                return null;
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+            String movieJasonStr = null;
+            try {
+                final String BASE_URL = "http://api.themoviedb.org/3/movie/";
+                final String APPID_PARAM = "api_key";
+                final String DATA = "append_to_response";
+
+                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                        .appendPath(params[0])
+                        .appendQueryParameter(APPID_PARAM, BuildConfig.API_KEY)
+                        .appendQueryParameter(DATA,"trailers,reviews")
+                        .build();
+
+                URL url= new URL(builtUri.toString());
+                Log.d(LOG_TAG, "Built URI " + builtUri.toString());
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                movieJasonStr = buffer.toString();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the movie data, there's no point in attemping
+                // to parse it.
+                return null;
+            } finally{
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            try {
+                return getMovieDataFromJson(movieJasonStr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+            Log.d(LOG_TAG,"JSON STUFF: " +movieJasonStr);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(List strings) {
+            super.onPostExecute(strings);
+            if (this.fragmentWeakRef.get() != null) {
+                if (strings != null) {
+                    reviewAdapter.addAll(strings);
+                }
+            }
+        }
+        /*    @Override
+        protected void onPostExecute(String strings) {
+            super.onPostExecute(Void string);
+            if (this.fragmentWeakRef.get() != null) {
+                if (strings != null) {
+                    //updateAdapter(strings);
+                }
+            }
+        }*/
+    }
 
     private void addToFavorite() {
         if (isFavorite()){

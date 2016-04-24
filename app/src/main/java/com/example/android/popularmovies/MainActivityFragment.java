@@ -68,7 +68,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             updateAdapter(movies);
                  }else{
             if (isConnected){
-                fetchMovies(getResources().getString(R.string.pref_unit_value));
+                fetchMovies(getResources().getString(R.string.sort_popular));
             } else{
                 Toast.makeText(getContext(),"No Connection",Toast.LENGTH_SHORT).show();
                 // noConnection.setVisibility(View.VISIBLE);
@@ -117,10 +117,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             return true;
         }*/
         if (id == R.id.action_popular) {
-            fetchMovies(getResources().getString(R.string.pref_unit_value));
+            fetchMovies(getResources().getString(R.string.sort_popular));
         }
         if (id == R.id.action_rated) {
-            fetchMovies(getResources().getString(R.string.sort_by_rated));
+            fetchMovies(getResources().getString(R.string.sort_top_rated));
         }
         if (id == R.id.action_favorites) {
             getLoaderManager().restartLoader(FAVORITE_LOADER, null, this);
@@ -200,6 +200,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 movies.add(movie);
             }
             return  movies;
+
         }
 
         @Override
@@ -208,12 +209,14 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             BufferedReader reader = null;
             String movieJasonStr = null;
             try {
-                final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
-                final String QUERY_PARAM = "sort_by";
+                //final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
+                final String BASE_URL = "http://api.themoviedb.org/3/movie/";
+               // final String QUERY_PARAM = "sort_by";
                 final String APPID_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(QUERY_PARAM, params[0])
+                        //.appendQueryParameter(QUERY_PARAM, params[0])
+                        .appendPath(params[0])
                         .appendQueryParameter(APPID_PARAM, BuildConfig.API_KEY)
                         .build();
 
