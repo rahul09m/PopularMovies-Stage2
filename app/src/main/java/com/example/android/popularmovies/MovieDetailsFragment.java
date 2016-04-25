@@ -45,7 +45,7 @@ public class MovieDetailsFragment extends Fragment {
     private ArrayList<Reviews> reviews;
     private ReviewAdapter reviewAdapter;
     private ListView listviewReviews;
-   // private ArrayList<Trailers> trailers;
+   private ArrayList trailers;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -122,6 +122,11 @@ public class MovieDetailsFragment extends Fragment {
             final String REVIEWURL = "url";
             final String REVIEW_ID = "id";
 
+            final String TRAILER_NAME = "name";
+            final String TRAILER_SIZE= "size";
+            final String TRAILER_SOURCE ="source";
+            final String TRAILER_TYPE = "type";
+
             JSONObject moviesJson = new JSONObject(forecastJsonStr);
             JSONObject reviewsJSON = moviesJson.getJSONObject("reviews");
             JSONArray moviesArrayReviews = reviewsJSON.getJSONArray(REVIEWS_RESULT);
@@ -139,8 +144,24 @@ public class MovieDetailsFragment extends Fragment {
                 Reviews review = new Reviews(reviewID,author,content,url);
                 reviews.add(review);
             }
-            Log.d(LOG_TAG,"reviews"+reviews);
-            return  reviews;
+          //  Log.d(LOG_TAG,"reviews"+reviews);
+
+            JSONObject trailersJSON = moviesJson.getJSONObject("trailers");
+            JSONArray moviesArrayTrailers = trailersJSON.getJSONArray("youtube");
+
+            trailers = new ArrayList<>(moviesArrayTrailers.length());
+            for (int i = 0; i < moviesArrayTrailers.length(); i++) {
+                JSONObject trailersJ = moviesArrayTrailers.getJSONObject(i);
+                String trailerName = trailersJ.getString(TRAILER_NAME);
+                String size = trailersJ.getString(TRAILER_SIZE);
+                String source = trailersJ.getString(TRAILER_SOURCE);
+                String type = trailersJ.getString(TRAILER_TYPE);
+
+                Trailers trailer = new Trailers(trailerName,size,source,type);
+                trailers.add(trailer);
+                //Log.d(LOG_TAG,"trailers: "+ trailers);
+            }
+            return  reviews ;
 
         }
 
@@ -228,15 +249,6 @@ public class MovieDetailsFragment extends Fragment {
                 }
             }
         }
-        /*    @Override
-        protected void onPostExecute(String strings) {
-            super.onPostExecute(Void string);
-            if (this.fragmentWeakRef.get() != null) {
-                if (strings != null) {
-                    //updateAdapter(strings);
-                }
-            }
-        }*/
     }
 
     private void addToFavorite() {
