@@ -56,22 +56,43 @@
         android:src="@drawable/ic_star_border_black_24dp"
         android:id="@+id/fab_add"
         app:layout_anchorGravity="bottom|right|end"/>
-    <TextView
+  <!--  <TextView
         android:id="@+id/ReviewsText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="REVIEWS :"
         android:textAllCaps="true"
-        android:textStyle="bold" />
+        android:textStyle="bold" />-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/trailer_button"
+        android:text="Trailers"/>
+
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/listview_trailer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        android:nestedScrollingEnabled="true"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/review_button"
+        android:text="Reviews"/>
 
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/listview_review"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/ReviewsText"
         android:layout_marginTop="20dp"
         android:nestedScrollingEnabled="true"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"/>
+
+
+
 </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+</android.support.v4.widget.NestedScrollView>

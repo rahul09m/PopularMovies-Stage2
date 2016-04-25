@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,7 +45,9 @@ public class MovieDetailsFragment extends Fragment {
     FloatingActionButton fabFavorite;
     private ArrayList<Reviews> reviews;
     private ReviewAdapter reviewAdapter;
+    private TrailerAdapter trailerAdapter;
     private ListView listviewReviews;
+    private ListView listviewTrailers;
    private ArrayList trailers;
 
     public MovieDetailsFragment() {
@@ -58,6 +61,7 @@ public class MovieDetailsFragment extends Fragment {
         Intent receiveIntent = getActivity().getIntent();
         myMovie = receiveIntent.getParcelableExtra("movie");
         reviewAdapter = new ReviewAdapter(getActivity(), new ArrayList<Reviews>());
+        trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailers>());
         FetchReviewsTask fetchReviewsTask = new FetchReviewsTask(this);
         fetchReviewsTask.execute(myMovie.movieID);
         //setRetainInstance(true);
@@ -98,12 +102,51 @@ public class MovieDetailsFragment extends Fragment {
 
         listviewReviews = (ListView) view.findViewById(R.id.listview_review);
         listviewReviews.setAdapter(reviewAdapter);
+        Button reviewButton = (Button)view.findViewById(R.id.review_button);
+        reviewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!reviews.isEmpty()){
+                    Log.d("BUTTONREVIEWS",String.valueOf(reviews));
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        reviewAdapter.clear();
+                        reviewAdapter.addAll(reviews);
+                        reviewAdapter.notifyDataSetChanged();
+                    }
+                });
+            }else{
+                Toast.makeText(getContext(),"No Reviews",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
+        listviewTrailers = (ListView) view.findViewById(R.id.listview_trailer);
+        listviewTrailers.setAdapter(trailerAdapter);
+        Button trailerButton = (Button)view.findViewById(R.id.trailer_button);
+        trailerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!trailers.isEmpty()){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            trailerAdapter.clear();
+                            trailerAdapter.addAll(trailers);
+                            trailerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }else{
+                    Toast.makeText(getContext(),"No Trailers",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         return view;
     }
 
     //private class FetchReviewsTask extends AsyncTask
-    private class FetchReviewsTask extends AsyncTask<String,Void,List> {
+    private class FetchReviewsTask extends AsyncTask<String,Void,Void> {
 
         private final String LOG_TAG = FetchReviewsTask.class.getSimpleName();
         private WeakReference<MovieDetailsFragment> fragmentWeakRef;
@@ -113,7 +156,7 @@ public class MovieDetailsFragment extends Fragment {
         }
 
 
-        private List<Reviews> getMovieDataFromJson(String forecastJsonStr)
+        private List getMovieDataFromJson(String forecastJsonStr)
                 throws JSONException {
             // These are the names of the JSON objects that need to be extracted.
             final String REVIEWS_RESULT = "results";
@@ -144,7 +187,6 @@ public class MovieDetailsFragment extends Fragment {
                 Reviews review = new Reviews(reviewID,author,content,url);
                 reviews.add(review);
             }
-          //  Log.d(LOG_TAG,"reviews"+reviews);
 
             JSONObject trailersJSON = moviesJson.getJSONObject("trailers");
             JSONArray moviesArrayTrailers = trailersJSON.getJSONArray("youtube");
@@ -161,12 +203,12 @@ public class MovieDetailsFragment extends Fragment {
                 trailers.add(trailer);
                 //Log.d(LOG_TAG,"trailers: "+ trailers);
             }
-            return  reviews ;
-
+            //return  reviews ;
+            return null;
         }
 
         @Override
-        protected List doInBackground(String... params) {
+        protected Void doInBackground(String... params) {
             if (params.length==0)
                 return null;
 
@@ -231,7 +273,7 @@ public class MovieDetailsFragment extends Fragment {
                 }
             }
             try {
-                return getMovieDataFromJson(movieJasonStr);
+                getMovieDataFromJson(movieJasonStr);
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -240,7 +282,7 @@ public class MovieDetailsFragment extends Fragment {
             return null;
         }
 
-        @Override
+       /* @Override
         protected void onPostExecute(List strings) {
             super.onPostExecute(strings);
             if (this.fragmentWeakRef.get() != null) {
@@ -248,7 +290,7 @@ public class MovieDetailsFragment extends Fragment {
                     reviewAdapter.addAll(strings);
                 }
             }
-        }
+        }*/
     }
 
     private void addToFavorite() {
