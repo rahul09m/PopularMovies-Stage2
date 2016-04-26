@@ -2,8 +2,9 @@ package com.example.android.popularmovies;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,144 +42,161 @@ import java.util.List;
 public class MovieDetailsFragment extends Fragment {
     // FloatingActionButton fabFavorite;
     Movie myMovie;
-    Context mContext;
     FloatingActionButton fabFavorite;
     private ArrayList<Reviews> reviews;
     private ReviewAdapter reviewAdapter;
     private TrailerAdapter trailerAdapter;
     private ListView listviewReviews;
     private ListView listviewTrailers;
-   private ArrayList trailers;
+    private ArrayList trailers;
+    private static final String MOVIE_TAG = "movie";
+    Boolean isConnected;
+    String movie_ID;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
-
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent receiveIntent = getActivity().getIntent();
-        myMovie = receiveIntent.getParcelableExtra("movie");
-        reviewAdapter = new ReviewAdapter(getActivity(), new ArrayList<Reviews>());
-        trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailers>());
-        FetchReviewsTask fetchReviewsTask = new FetchReviewsTask(this);
-        fetchReviewsTask.execute(myMovie.movieID);
-        //setRetainInstance(true);
+        Bundle arguments = getArguments();
+        if (arguments != null){
+            myMovie = arguments.getParcelable(MOVIE_TAG);
+        }
+        if (myMovie != null) {
+            Log.d("myMovieinMovieDFragment", String.valueOf(myMovie));
+            // myMovie = receiveIntent.getParcelableExtra(MOVIE_TAG);
+            //  }
+            reviewAdapter = new ReviewAdapter(getActivity(), new ArrayList<Reviews>());
+            trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailers>());
+            checkConnection();
+            if (isConnected) {
+                FetchTrailersandReviews fetchTrailersandReviews = new FetchTrailersandReviews(this);
+                fetchTrailersandReviews.execute(myMovie.movieID);
+            } else {
+                Toast.makeText(getContext(), R.string.no_connection_message, Toast.LENGTH_SHORT).show();
+            }
+            //setRetainInstance(true);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_details, container, false);
-        TextView movieNameText = (TextView) view.findViewById(R.id.moviename);
-        movieNameText.setText(myMovie.movieName);
-        ImageView imageMovie = (ImageView) view.findViewById(R.id.movieimage);
-        Picasso.with(getContext())
-                .load(myMovie.image)
-                .error(R.drawable.ic_launcher)
-                .placeholder(R.drawable.ic_launcher)
-                .into(imageMovie);
-        TextView releaseText = (TextView) view.findViewById(R.id.releasedate);
-        releaseText.setText(myMovie.releaseDate);
-        TextView overviewText = (TextView) view.findViewById(R.id.overview);
-        overviewText.setText(myMovie.overView);
+        if (myMovie != null) {
+            View view = inflater.inflate(R.layout.fragment_details, container, false);
+            TextView movieNameText = (TextView) view.findViewById(R.id.moviename);
+            movieNameText.setText(myMovie.movieName);
+            ImageView imageMovie = (ImageView) view.findViewById(R.id.movieimage);
+            Picasso.with(getContext())
+                    .load(myMovie.image)
+                    .error(R.drawable.ic_launcher)
+                    .placeholder(R.drawable.ic_launcher)
+                    .into(imageMovie);
+            TextView releaseText = (TextView) view.findViewById(R.id.releasedate);
+            releaseText.setText(myMovie.releaseDate);
+            TextView overviewText = (TextView) view.findViewById(R.id.overview);
+            overviewText.setText(myMovie.overView);
 
-        TextView voteaverageText = (TextView) view.findViewById(R.id.voteaverage);
-        voteaverageText.setText(myMovie.userRating);
+            TextView voteaverageText = (TextView) view.findViewById(R.id.voteaverage);
+            voteaverageText.setText(myMovie.userRating);
 
-        fabFavorite = (FloatingActionButton) view.findViewById(R.id.fab_add);
-       if (isFavorite())
-           fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
+            fabFavorite = (FloatingActionButton) view.findViewById(R.id.fab_add);
+            if (isFavorite())
+                fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
 
-        fabFavorite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addToFavorite();
-            }
-        });
+            fabFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    addToFavorite();
+                }
+            });
 
 
-        listviewReviews = (ListView) view.findViewById(R.id.listview_review);
-        listviewReviews.setAdapter(reviewAdapter);
-        Button reviewButton = (Button)view.findViewById(R.id.review_button);
-        reviewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!reviews.isEmpty()){
-                    Log.d("BUTTONREVIEWS",String.valueOf(reviews));
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        reviewAdapter.clear();
-                        reviewAdapter.addAll(reviews);
-                        reviewAdapter.notifyDataSetChanged();
+            listviewReviews = (ListView) view.findViewById(R.id.listview_review);
+            listviewReviews.setAdapter(reviewAdapter);
+            Button reviewButton = (Button) view.findViewById(R.id.review_button);
+            reviewButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!reviews.isEmpty()) {
+                        Log.d("BUTTONREVIEWS", String.valueOf(reviews));
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                reviewAdapter.clear();
+                                reviewAdapter.addAll(reviews);
+                                reviewAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), "No Reviews", Toast.LENGTH_SHORT).show();
                     }
-                });
-            }else{
-                Toast.makeText(getContext(),"No Reviews",Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
 
-        listviewTrailers = (ListView) view.findViewById(R.id.listview_trailer);
-        listviewTrailers.setAdapter(trailerAdapter);
-        Button trailerButton = (Button)view.findViewById(R.id.trailer_button);
-        trailerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!trailers.isEmpty()){
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            trailerAdapter.clear();
-                            trailerAdapter.addAll(trailers);
-                            trailerAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }else{
-                    Toast.makeText(getContext(),"No Trailers",Toast.LENGTH_SHORT).show();
+            listviewTrailers = (ListView) view.findViewById(R.id.listview_trailer);
+            listviewTrailers.setAdapter(trailerAdapter);
+            Button trailerButton = (Button) view.findViewById(R.id.trailer_button);
+            trailerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!trailers.isEmpty()) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                trailerAdapter.clear();
+                                trailerAdapter.addAll(trailers);
+                                trailerAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), "No Trailers", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
-        return view;
+            });
+            return view;
+        }
+        return null;
     }
 
-    //private class FetchReviewsTask extends AsyncTask
-    private class FetchReviewsTask extends AsyncTask<String,Void,Void> {
+    private class FetchTrailersandReviews extends AsyncTask<String,Void,Void> {
 
-        private final String LOG_TAG = FetchReviewsTask.class.getSimpleName();
+        private final String LOG_TAG = FetchTrailersandReviews.class.getSimpleName();
         private WeakReference<MovieDetailsFragment> fragmentWeakRef;
 
-        private FetchReviewsTask (MovieDetailsFragment fragment) {
+        private FetchTrailersandReviews(MovieDetailsFragment fragment) {
             this.fragmentWeakRef = new WeakReference<MovieDetailsFragment>(fragment);
         }
 
-
         private List getMovieDataFromJson(String forecastJsonStr)
                 throws JSONException {
-            // These are the names of the JSON objects that need to be extracted.
+
+            final String REVIEWS = "reviews";
             final String REVIEWS_RESULT = "results";
             final String AUTHOR = "author";
             final String CONTENT = "content";
             final String REVIEWURL = "url";
             final String REVIEW_ID = "id";
 
+            final String TRAILERS = "trailers";
+            final String YOUTUBE = "youtube";
             final String TRAILER_NAME = "name";
             final String TRAILER_SIZE= "size";
             final String TRAILER_SOURCE ="source";
             final String TRAILER_TYPE = "type";
 
             JSONObject moviesJson = new JSONObject(forecastJsonStr);
-            JSONObject reviewsJSON = moviesJson.getJSONObject("reviews");
+            //Reviews
+            JSONObject reviewsJSON = moviesJson.getJSONObject(REVIEWS);
             JSONArray moviesArrayReviews = reviewsJSON.getJSONArray(REVIEWS_RESULT);
 
-            // movies = new Movie[moviesArray.length()];
             reviews = new ArrayList<>(moviesArrayReviews.length());
             for (int i = 0; i < moviesArrayReviews.length(); i++) {
-                // Get the JSON object representing the movie
                 JSONObject reviewsJ = moviesArrayReviews.getJSONObject(i);
+
                 String reviewID = reviewsJ.getString(REVIEW_ID);
                 String author = reviewsJ.getString(AUTHOR);
                 String content = reviewsJ.getString(CONTENT);
@@ -187,13 +205,14 @@ public class MovieDetailsFragment extends Fragment {
                 Reviews review = new Reviews(reviewID,author,content,url);
                 reviews.add(review);
             }
-
-            JSONObject trailersJSON = moviesJson.getJSONObject("trailers");
-            JSONArray moviesArrayTrailers = trailersJSON.getJSONArray("youtube");
+            //Trailers
+            JSONObject trailersJSON = moviesJson.getJSONObject(TRAILERS);
+            JSONArray moviesArrayTrailers = trailersJSON.getJSONArray(YOUTUBE);
 
             trailers = new ArrayList<>(moviesArrayTrailers.length());
             for (int i = 0; i < moviesArrayTrailers.length(); i++) {
                 JSONObject trailersJ = moviesArrayTrailers.getJSONObject(i);
+
                 String trailerName = trailersJ.getString(TRAILER_NAME);
                 String size = trailersJ.getString(TRAILER_SIZE);
                 String source = trailersJ.getString(TRAILER_SOURCE);
@@ -201,9 +220,7 @@ public class MovieDetailsFragment extends Fragment {
 
                 Trailers trailer = new Trailers(trailerName,size,source,type);
                 trailers.add(trailer);
-                //Log.d(LOG_TAG,"trailers: "+ trailers);
             }
-            //return  reviews ;
             return null;
         }
 
@@ -295,7 +312,7 @@ public class MovieDetailsFragment extends Fragment {
 
     private void addToFavorite() {
         if (isFavorite()){
-            Toast.makeText(getContext(),"Movie Deleted",Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), R.string.movie_favorite_delete_message ,Toast.LENGTH_LONG).show();
             getContext().getContentResolver().delete(FavoritesProvider.Favorites.withMovieID(myMovie.movieID), null, null);
             fabFavorite.setImageResource(R.drawable.ic_star_border_black_24dp);
         }else {
@@ -308,7 +325,7 @@ public class MovieDetailsFragment extends Fragment {
             cv.put(FavoritesColumns.MOVIE_ID, myMovie.movieID);
             Uri result = getContext().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
             fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
-            Toast.makeText(getContext(),"Movie Added",Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), R.string.movie_favorite_add_message,Toast.LENGTH_LONG).show();
         }
     }
 
@@ -324,5 +341,13 @@ public class MovieDetailsFragment extends Fragment {
             c.close();
         }
         return false;
+    }
+
+    private void checkConnection(){
+        ConnectivityManager cm =
+                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 }

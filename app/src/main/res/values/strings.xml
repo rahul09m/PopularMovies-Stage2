@@ -14,4 +14,8 @@
     <string name="title_activity_settings">Settings</string>
     <string name="sort_popular">popular</string>
     <string name="sort_top_rated">top_rated</string>
+    <string name="no_connection_message">Error, please check your Internet Connection</string>
+    <string name="no_favorites_message">You have no saved favorites..</string>
+    <string name="movie_favorite_add_message">Successfully Added to Favorites</string>
+    <string name="movie_favorite_delete_message">Successfully Removed from Favorites</string>
 </resources>

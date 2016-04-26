@@ -1,15 +1,12 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -23,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.data.FavoritesColumns;
@@ -46,11 +42,13 @@ import java.util.List;
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
    private MovieAdapter movieAdapter;
     private ArrayList<Movie> movies;
-   // Movie[] movies;
+    private static final String MOVIE_TAG = "movie";
     private WeakReference<FetchMoviesTask> asyncTaskWeakRef;
     private static final int FAVORITE_LOADER = 0;
     private static final String KEY_MOVIES = "moviesList";
     Boolean isConnected;
+    Boolean mTwoPane = false;
+    private final String DETAIL_FRAGMENT_TAG = "DFTAG";
 
     public MainActivityFragment() {
     }
@@ -60,7 +58,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-       // setRetainInstance(true);
+        // setRetainInstance(true);
         checkConnection();
         movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
         if (savedInstanceState != null) {
@@ -70,25 +68,25 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             if (isConnected){
                 fetchMovies(getResources().getString(R.string.sort_popular));
             } else{
-                Toast.makeText(getContext(),"No Connection",Toast.LENGTH_SHORT).show();
-                // noConnection.setVisibility(View.VISIBLE);
+                Toast.makeText(getContext(), R.string.no_connection_message,Toast.LENGTH_SHORT).show();
             }
         }
-       }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
         GridView gridView = (GridView) rootView.findViewById(R.id.grid_view);
         gridView.setAdapter(movieAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie flavorClick = movieAdapter.getItem(position);
-                Intent movieClick = new Intent(getActivity(),MovieDetails.class);
-                movieClick.putExtra("movie",flavorClick);
-                startActivity(movieClick);
+                Movie movie= movieAdapter.getItem(position);
+                ((Callback) getActivity())
+                        .onItemSelected(movieAdapter.getItem(position));
             }
         });
         return rootView;
@@ -129,6 +127,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         return super.onOptionsItemSelected(item);
     }
 
+    public interface Callback<Movie>{
+        void onItemSelected(Movie movieUri);
+    }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), FavoritesProvider.Favorites.CONTENT_URI, null, null, null, null);
@@ -151,11 +152,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             cursor.close();
             updateAdapter(movies);
         }else{
-            Toast.makeText(getContext(),"No FAvs",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.no_favorites_message,Toast.LENGTH_SHORT).show();
         }
     }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {}
+
 
     private class FetchMoviesTask extends AsyncTask<String,Void,List<Movie>> {
 
@@ -185,8 +187,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
            // movies = new Movie[moviesArray.length()];
            movies = new ArrayList<>(moviesArray.length());
             for (int i = 0; i < moviesArray.length(); i++) {
-                                // Get the JSON object representing the movie
                 JSONObject movieJ = moviesArray.getJSONObject(i);
+
                 String moviePoster = movieJ.getString(POSTER_PATH);
                 String movieTitle = movieJ.getString(ORIGINAL_TITLE);
                 String releaseDate = movieJ.getString(RELEASE_DATE);
@@ -194,15 +196,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 String voteAverage = movieJ.getString(VOTE_AVERAGE);
                 String url = poster_url.concat(moviePoster);
                 String movieID = movieJ.getString(MOVIE_ID);
-                                  //movieAdapter.add(new Movie(url));
-               // movies[i] = new Movie(movieTitle,overView,releaseDate,voteAverage, url,movieID);
+
                 Movie movie = new Movie(movieTitle,overView,releaseDate,voteAverage, url,movieID);
                 movies.add(movie);
             }
             return  movies;
 
         }
-
         @Override
         protected List<Movie> doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
