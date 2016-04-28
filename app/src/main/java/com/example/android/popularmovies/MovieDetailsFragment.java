@@ -40,7 +40,6 @@ import java.util.List;
 
 
 public class MovieDetailsFragment extends Fragment {
-    // FloatingActionButton fabFavorite;
     Movie myMovie;
     FloatingActionButton fabFavorite;
     private ArrayList<Reviews> reviews;
@@ -50,8 +49,9 @@ public class MovieDetailsFragment extends Fragment {
     private ListView listviewTrailers;
     private ArrayList trailers;
     private static final String MOVIE_TAG = "movie";
+    private static final String KEY_TRAILERS = "trailers";
+    private static final String KEY_REVIEWS = "reviews";
     Boolean isConnected;
-    String movie_ID;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -64,20 +64,24 @@ public class MovieDetailsFragment extends Fragment {
         if (arguments != null){
             myMovie = arguments.getParcelable(MOVIE_TAG);
         }
+
         if (myMovie != null) {
-            Log.d("myMovieinMovieDFragment", String.valueOf(myMovie));
-            // myMovie = receiveIntent.getParcelableExtra(MOVIE_TAG);
-            //  }
             reviewAdapter = new ReviewAdapter(getActivity(), new ArrayList<Reviews>());
             trailerAdapter = new TrailerAdapter(getActivity(), new ArrayList<Trailers>());
-            checkConnection();
-            if (isConnected) {
-                FetchTrailersandReviews fetchTrailersandReviews = new FetchTrailersandReviews(this);
-                fetchTrailersandReviews.execute(myMovie.movieID);
+
+            if (savedInstanceState != null) {
+                trailers = savedInstanceState.getParcelableArrayList(KEY_TRAILERS);
+                reviews = savedInstanceState.getParcelableArrayList(KEY_REVIEWS);
             } else {
-                Toast.makeText(getContext(), R.string.no_connection_message, Toast.LENGTH_SHORT).show();
+
+                checkConnection();
+                if (isConnected) {
+                    FetchTrailersandReviews fetchTrailersandReviews = new FetchTrailersandReviews(this);
+                    fetchTrailersandReviews.execute(myMovie.movieID);
+                } else {
+                    Toast.makeText(getContext(), R.string.no_connection_message, Toast.LENGTH_SHORT).show();
+                }
             }
-            //setRetainInstance(true);
         }
     }
 
@@ -87,16 +91,20 @@ public class MovieDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         if (myMovie != null) {
             View view = inflater.inflate(R.layout.fragment_details, container, false);
+
             TextView movieNameText = (TextView) view.findViewById(R.id.moviename);
             movieNameText.setText(myMovie.movieName);
+
             ImageView imageMovie = (ImageView) view.findViewById(R.id.movieimage);
             Picasso.with(getContext())
                     .load(myMovie.image)
                     .error(R.drawable.ic_launcher)
                     .placeholder(R.drawable.ic_launcher)
                     .into(imageMovie);
+
             TextView releaseText = (TextView) view.findViewById(R.id.releasedate);
             releaseText.setText(myMovie.releaseDate);
+
             TextView overviewText = (TextView) view.findViewById(R.id.overview);
             overviewText.setText(myMovie.overView);
 
@@ -114,7 +122,6 @@ public class MovieDetailsFragment extends Fragment {
                 }
             });
 
-
             listviewReviews = (ListView) view.findViewById(R.id.listview_review);
             listviewReviews.setAdapter(reviewAdapter);
             Button reviewButton = (Button) view.findViewById(R.id.review_button);
@@ -122,7 +129,6 @@ public class MovieDetailsFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     if (!reviews.isEmpty()) {
-                        Log.d("BUTTONREVIEWS", String.valueOf(reviews));
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -148,6 +154,7 @@ public class MovieDetailsFragment extends Fragment {
                             @Override
                             public void run() {
                                 trailerAdapter.clear();
+                                listviewTrailers.setDividerHeight(100);
                                 trailerAdapter.addAll(trailers);
                                 trailerAdapter.notifyDataSetChanged();
                             }
@@ -160,6 +167,13 @@ public class MovieDetailsFragment extends Fragment {
             return view;
         }
         return null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(KEY_REVIEWS, reviews);
+        outState.putParcelableArrayList(KEY_TRAILERS, trailers);
+        super.onSaveInstanceState(outState);
     }
 
     private class FetchTrailersandReviews extends AsyncTask<String,Void,Void> {
@@ -298,22 +312,12 @@ public class MovieDetailsFragment extends Fragment {
             Log.d(LOG_TAG,"JSON STUFF: " +movieJasonStr);
             return null;
         }
-
-       /* @Override
-        protected void onPostExecute(List strings) {
-            super.onPostExecute(strings);
-            if (this.fragmentWeakRef.get() != null) {
-                if (strings != null) {
-                    reviewAdapter.addAll(strings);
-                }
-            }
-        }*/
     }
 
     private void addToFavorite() {
         if (isFavorite()){
-            Toast.makeText(getContext(), R.string.movie_favorite_delete_message ,Toast.LENGTH_LONG).show();
             getContext().getContentResolver().delete(FavoritesProvider.Favorites.withMovieID(myMovie.movieID), null, null);
+            Toast.makeText(getContext(), R.string.movie_favorite_delete_message ,Toast.LENGTH_LONG).show();
             fabFavorite.setImageResource(R.drawable.ic_star_border_black_24dp);
         }else {
             ContentValues cv = new ContentValues();
@@ -323,7 +327,7 @@ public class MovieDetailsFragment extends Fragment {
             cv.put(FavoritesColumns.VOTE_AVERAGE, myMovie.userRating);
             cv.put(FavoritesColumns.OVERVIEW, myMovie.overView);
             cv.put(FavoritesColumns.MOVIE_ID, myMovie.movieID);
-            Uri result = getContext().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
+            getContext().getContentResolver().insert(FavoritesProvider.Favorites.CONTENT_URI, cv);
             fabFavorite.setImageResource(R.drawable.ic_star_black_24dp);
             Toast.makeText(getContext(), R.string.movie_favorite_add_message,Toast.LENGTH_LONG).show();
         }

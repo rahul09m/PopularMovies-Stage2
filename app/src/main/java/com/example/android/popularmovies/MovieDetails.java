@@ -27,7 +27,7 @@ public class MovieDetails extends AppCompatActivity {
         if (savedInstanceState == null) {
             Bundle arguments = new Bundle();
             arguments.putParcelable(MOVIE_TAG, movieId);
-            Log.d("myMovieinMovieD", String.valueOf(movieId));
+
             MovieDetailsFragment fragment = new MovieDetailsFragment();
             fragment.setArguments(arguments);
 
@@ -35,6 +35,6 @@ public class MovieDetails extends AppCompatActivity {
                     .add(R.id.movie_detail_container, fragment)
                     .commit();
         }
-        }
     }
+}
 

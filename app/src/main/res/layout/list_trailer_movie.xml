@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:layout_height="match_parent"
+<FrameLayout android:layout_height="50dp"
     android:layout_width="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MovieDetailsFragment"
@@ -9,17 +9,19 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <!-- android:padding="@dimen/text_margin">-->
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="10dp"
             android:id="@+id/trailer_img"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"
             android:paddingTop="15dp"
+            android:clickable="true"
             android:id="@+id/trailer_name" />
     </LinearLayout>
 </FrameLayout>

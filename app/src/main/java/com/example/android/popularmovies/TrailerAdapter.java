@@ -22,19 +22,22 @@ public class TrailerAdapter extends ArrayAdapter<Trailers> {
         super(context,0,trailers);
     }
 
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Trailers trailers = getItem(position);
         final String trailerUrl = "https://www.youtube.com/watch?v=" + trailers.source;
+
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(
                     R.layout.list_trailer_movie, parent, false);
         }
+
         ImageView imgView = (ImageView)convertView.findViewById(R.id.trailer_img);
         imgView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+
         TextView name = (TextView)convertView.findViewById(R.id.trailer_name);
         name.setText(trailers.name);
+
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -42,9 +45,6 @@ public class TrailerAdapter extends ArrayAdapter<Trailers> {
                 getContext().startActivity(shareIntent);
             }
         });
-        //final String source = trailers.source;
-
-
         return convertView;
     }
 }

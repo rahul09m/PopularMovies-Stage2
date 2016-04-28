@@ -4,16 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback<Movie>{
-   // private RetainedFragment dataFragment;
-  Boolean mTwoPane;
+
+    Boolean mTwoPane;
     private static final String MOVIE_TAG = "movie";
-    Movie myMovie;
     private final String DETAIL_FRAGMENT_TAG = "DFTAG";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +20,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (findViewById(R.id.movie_detail_container) != null) {
-            Log.d("MainActivi","in here");
             mTwoPane = true;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -40,25 +38,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         return true;
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-      /*  if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }*/
-
-       /* if (id == R.id.action_favorites) {
-            Toast.makeText(getApplicationContext(),"Fav",Toast.LENGTH_SHORT).show();
-        }*/
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -66,10 +51,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
     @Override
     public void onItemSelected(Movie movieUri) {
         if (mTwoPane) {
-            Log.d("TWOPANE","Here");
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
+            // In two-pane mode, callback from Fragment
             Bundle args = new Bundle();
             args.putParcelable(MOVIE_TAG,movieUri);
             MovieDetailsFragment fragment = new MovieDetailsFragment();
@@ -81,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         } else {
             Intent movieClick = new Intent(this, MovieDetails.class);
             movieClick.putExtra(MOVIE_TAG, movieUri);
-            Log.d("myMovieinMsin",String.valueOf(movieUri));
             startActivity(movieClick);
         }
     }

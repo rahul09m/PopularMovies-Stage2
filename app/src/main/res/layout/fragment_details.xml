@@ -3,85 +3,86 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/moviename"
-      />
-
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="70dp"
+            android:background="@color/colorAccent"
+            android:padding="10dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/moviename"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="160dp"
+                    android:layout_height="200dp"
+                    android:padding="5dp"
                     android:id="@+id/movieimage" />
 
                     <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:paddingTop="10dp"
                             android:orientation="vertical">
 
-                        <TextView
-                                 android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="?android:attr/textAppearanceMedium"
-                                    android:id="@+id/releasedate" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="?android:attr/textAppearanceMedium"
-                                     android:id="@+id/voteaverage" />
-
-
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:attr/textAppearanceMedium"
+                                android:id="@+id/releasedate" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?android:attr/textAppearanceMedium"
+                                android:id="@+id/voteaverage" />
+                            <android.support.design.widget.FloatingActionButton
+                                android:id="@+id/fab_add"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:clickable="true"
+                                android:src="@drawable/ic_star_border_black_24dp" />
                     </LinearLayout>
 
-        </LinearLayout>
+            </LinearLayout>
     <TextView
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/overview" />
-    <android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:src="@drawable/ic_star_border_black_24dp"
-        android:id="@+id/fab_add"
-        app:layout_anchorGravity="bottom|right|end"/>
-  <!--  <TextView
-        android:id="@+id/ReviewsText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="REVIEWS :"
-        android:textAllCaps="true"
-        android:textStyle="bold" />-->
+        android:id="@+id/overview"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/trailer_button"
-        android:text="Trailers"/>
+        android:text="View Trailers"
+        android:padding="10dp"
+        android:background="@color/colorAccent"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin" />
 
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/listview_trailer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="20dp"
         android:nestedScrollingEnabled="true"
+        android:layout_marginTop="20dp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/review_button"
-        android:text="Reviews"/>
+        android:text="View Reviews"
+        android:padding="10dp"
+        android:background="@color/colorAccent"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin" />
 
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/listview_review"
@@ -91,8 +92,6 @@
         android:nestedScrollingEnabled="true"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"/>
-
-
 
 </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

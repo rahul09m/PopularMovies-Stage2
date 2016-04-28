@@ -1,7 +1,6 @@
 package com.example.android.popularmovies;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,21 +53,15 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         // and we modify the View widgets as usual.
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.flavor_item, parent, false);
+                    R.layout.movie_item, parent, false);
         }
 
-          //  http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
-        ImageView iconView = (ImageView) convertView.findViewById(R.id.flavor_image);
-       // iconView.setImageResource(movie.image);
+        ImageView iconView = (ImageView) convertView.findViewById(R.id.movie_image);
         Picasso.with(getContext())
                 .load(movie.image)
                 .error(R.drawable.ic_launcher)
                 .placeholder(R.drawable.ic_launcher)
                 .into(iconView);
-        Log.d(LOG_TAG, "Movie name: "+ movie.movieName);
-       // TextView versionNameView = (TextView) convertView.findViewById(R.id.flavor_text);
-        //versionNameView.setText(movie.versionName
-         //       + " - " + movie.versionNumber);
 
         return convertView;
     }

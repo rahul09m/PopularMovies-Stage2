@@ -42,23 +42,19 @@ import java.util.List;
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
    private MovieAdapter movieAdapter;
     private ArrayList<Movie> movies;
-    private static final String MOVIE_TAG = "movie";
     private WeakReference<FetchMoviesTask> asyncTaskWeakRef;
     private static final int FAVORITE_LOADER = 0;
     private static final String KEY_MOVIES = "moviesList";
     Boolean isConnected;
-    Boolean mTwoPane = false;
-    private final String DETAIL_FRAGMENT_TAG = "DFTAG";
 
     public MainActivityFragment() {
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        // setRetainInstance(true);
+
         checkConnection();
         movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
         if (savedInstanceState != null) {
@@ -84,7 +80,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie= movieAdapter.getItem(position);
                 ((Callback) getActivity())
                         .onItemSelected(movieAdapter.getItem(position));
             }
@@ -110,10 +105,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-      /*  if (id == R.id.action_settings) {
-            startActivity(new Intent(getContext(), SettingsActivity.class));
-            return true;
-        }*/
+
         if (id == R.id.action_popular) {
             fetchMovies(getResources().getString(R.string.sort_popular));
         }
@@ -158,7 +150,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {}
 
-
     private class FetchMoviesTask extends AsyncTask<String,Void,List<Movie>> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
@@ -184,8 +175,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             JSONObject moviesJson = new JSONObject(forecastJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(MOVIES_RESULT);
 
-           // movies = new Movie[moviesArray.length()];
-           movies = new ArrayList<>(moviesArray.length());
+            movies = new ArrayList<>(moviesArray.length());
             for (int i = 0; i < moviesArray.length(); i++) {
                 JSONObject movieJ = moviesArray.getJSONObject(i);
 
@@ -226,7 +216,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
-
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
@@ -304,17 +293,4 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
     }
-      /*  private boolean isAsyncTaskPendingOrRunning() {
-        return this.asyncTaskWeakRef != null &&
-                this.asyncTaskWeakRef.get() != null &&
-                !this.asyncTaskWeakRef.get().getStatus().equals(AsyncTask.Status.FINISHED);
-    }
-    private void updateMovies(){
-        FetchMoviesTask weatherTask = new FetchMoviesTask(this);
-        this.asyncTaskWeakRef = new WeakReference<FetchMoviesTask>(weatherTask);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sort_by = prefs.getString(getString(R.string.sort_by_key),
-                getString(R.string.pref_unit_value));
-        weatherTask.execute(sort_by);
-    }*/
-}
+  }

@@ -7,12 +7,12 @@
         android:orderInCategory="100"
         app:showAsAction="never" />-->
     <item android:id="@+id/action_popular"
-        android:title="Sort By Popularity"
+        android:title="@string/sort_by_popularity"
         android:orderInCategory="200"/>
     <item android:id="@+id/action_rated"
-        android:title="Sory by Rating"
+        android:title="@string/sort_by_rating"
         android:orderInCategory="300"/>
     <item android:id="@+id/action_favorites"
-        android:title="Show Favorites"
+        android:title="@string/show_favorites"
         android:orderInCategory="400"/>
 </menu>

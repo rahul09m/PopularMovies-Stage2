@@ -12,9 +12,7 @@ public class Movie implements Parcelable {
     String releaseDate;
     String userRating;
     String image;
-    String movieID;// drawable reference id
-
-
+    String movieID;
 
     public Movie (String mName, String oView,String rDate, String userR, String image,String id) {
         this.movieName = mName;
