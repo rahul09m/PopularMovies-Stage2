@@ -20,4 +20,5 @@
     <string name="show_favorites">Show Favorites</string>
     <string name="sort_by_rating">Sort by Rating</string>
     <string name="sort_by_popularity">Sort By Popularity</string>
+    <string name="sort_favorites">favorites</string>
 </resources>

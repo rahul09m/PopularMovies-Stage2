@@ -1,14 +1,17 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -46,6 +49,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     private static final int FAVORITE_LOADER = 0;
     private static final String KEY_MOVIES = "moviesList";
     Boolean isConnected;
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
+    private final String DETAIL_FRAGMENT_TAG = "DFTAG";
 
     public MainActivityFragment() {
     }
@@ -53,16 +59,27 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         setHasOptionsMenu(true);
 
-        checkConnection();
+        sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String sort = sharedPref.getString(getResources().getString(R.string.sort_by_key),
+                getResources().getString(R.string.sort_popular));
         movieAdapter = new MovieAdapter(getActivity(), new ArrayList<Movie>());
+
         if (savedInstanceState != null) {
             movies = savedInstanceState.getParcelableArrayList(KEY_MOVIES);
+            if (movies !=null)
             updateAdapter(movies);
                  }else{
+            checkConnection();
             if (isConnected){
-                fetchMovies(getResources().getString(R.string.sort_popular));
+                //fetchMovies(getResources().getString(R.string.sort_popular));
+                if (sort.equals(getResources().getString(R.string.sort_favorites))) {
+                    getLoaderManager().restartLoader(FAVORITE_LOADER, null, this);
+                }else {
+                    fetchMovies(sort);
+                }
             } else{
                 Toast.makeText(getContext(), R.string.no_connection_message,Toast.LENGTH_SHORT).show();
             }
@@ -105,23 +122,34 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        editor = sharedPref.edit();
+        if (getActivity().findViewById(R.id.movie_detail_container) != null) {
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, new MovieDetailsFragment(), DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }
         if (id == R.id.action_popular) {
+            editor.putString(getResources().getString(R.string.sort_by_key),getResources().getString(R.string.sort_popular) );
+            editor.commit();
             fetchMovies(getResources().getString(R.string.sort_popular));
         }
         if (id == R.id.action_rated) {
+            editor.putString(getResources().getString(R.string.sort_by_key),getResources().getString(R.string.sort_top_rated) );
+            editor.commit();
             fetchMovies(getResources().getString(R.string.sort_top_rated));
         }
         if (id == R.id.action_favorites) {
+            editor.putString(getResources().getString(R.string.sort_by_key),getResources().getString(R.string.sort_favorites) );
+            editor.commit();
             getLoaderManager().restartLoader(FAVORITE_LOADER, null, this);
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     public interface Callback<Movie>{
         void onItemSelected(Movie movieUri);
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), FavoritesProvider.Favorites.CONTENT_URI, null, null, null, null);

@@ -2,6 +2,7 @@ package com.example.android.popularmovies;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+       // return super.onOptionsItemSelected(item);
+
         return super.onOptionsItemSelected(item);
     }
 

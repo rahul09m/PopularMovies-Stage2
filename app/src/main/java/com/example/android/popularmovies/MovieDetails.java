@@ -1,8 +1,11 @@
 package com.example.android.popularmovies;
 
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 
 /**
  * Created by Rahul on 04/03/2016.
@@ -16,8 +19,9 @@ public class MovieDetails extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.details_activity);
-        // Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //  setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle extras = getIntent().getExtras();
         Movie movieId = null;
@@ -35,6 +39,17 @@ public class MovieDetails extends AppCompatActivity {
                     .add(R.id.movie_detail_container, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+            switch (item.getItemId()) {
+                // Respond to the action bar's Up/Home button
+                case android.R.id.home:
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
+            }
+        return super.onOptionsItemSelected(item);
     }
 }
 
